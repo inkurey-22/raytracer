@@ -45,6 +45,7 @@ pipeline {
         script {
           docker.image(env.CONTAINER).inside('-i') {
             try {
+              sh label: 'install clippy', script: 'rustup component add clippy'
               sh label: 'cargo clippy', script: 'cargo clippy --all-targets --all-features -- -D warnings'
             } catch (err) {
               error('Clippy failed while running cargo clippy --all-targets --all-features -- -D warnings')
