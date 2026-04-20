@@ -2,6 +2,11 @@
 
 NAME = raytracer
 
+CRATE_DIRS = crates/camera \
+			 crates/light \
+			 crates/sphere \
+			 crates/vec3 \
+
 all:
 	cargo build --release
 	cp target/release/$(NAME) .
@@ -17,4 +22,9 @@ clean:
 fclean: clean
 
 test:
-	cargo test
+	@echo "Testing main"
+	@cargo test
+	@for dir in $(CRATE_DIRS); do \
+		echo "Testing $$dir"; \
+		cargo test --manifest-path=$$dir/Cargo.toml; \
+	done

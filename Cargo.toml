@@ -5,7 +5,7 @@ edition = "2024"
 
 [dependencies]
 config = { version = "0.15.22", default-features = false, features = ["toml"] }
-vec3 = { path = "vec3" }
-camera = { path = "camera" }
-light = { path = "light" }
-sphere = { path = "sphere" }
+vec3 = { path = "crates/vec3" }
+camera = { path = "crates/camera" }
+light = { path = "crates/light" }
+sphere = { path = "crates/sphere" }
