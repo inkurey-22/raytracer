@@ -58,8 +58,9 @@ pipeline {
       when { expression { currentBuild.currentResult == 'SUCCESS' } }
       steps {
         withCredentials([usernamePassword(credentialsId: env.MIRROR_CRED, usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
-          try {
-            sh label: 'mirror to repo', script: '''bash -c "
+          script {
+            try {
+              sh label: 'mirror to repo', script: '''bash -c "
 set -e
 git config user.name 'jenkins-bot'
 git config user.email 'jenkins@inkurey.fr'
@@ -73,8 +74,9 @@ git fetch mirror || true
 # Push to the mirror repository
 git push --force-with-lease mirror HEAD:refs/heads/main
 "'''
-          } catch (err) {
-            error('Mirror failed while pushing to the base or target repository')
+            } catch (err) {
+              error('Mirror failed while pushing to the base or target repository')
+            }
           }
         }
       }
