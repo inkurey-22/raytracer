@@ -1,4 +1,4 @@
-.phony: all debug clean fclean test
+.phony: all debug clean fclean re test
 
 NAME = raytracer
 
@@ -20,6 +20,8 @@ clean:
 	rm -f $(NAME)
 
 fclean: clean
+
+re: fclean all
 
 test:
 	@echo "Testing main"
