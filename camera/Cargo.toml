@@ -1,0 +1,11 @@
+[package]
+name = "camera"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "camera"
+path = "src/lib.rs"
+
+[dependencies]
+vec3 = { path = "../vec3" }

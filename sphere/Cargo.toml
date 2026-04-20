@@ -1,0 +1,11 @@
+[package]
+name = "sphere"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "sphere"
+path = "src/lib.rs"
+
+[dependencies]
+vec3 = { path = "../vec3" }

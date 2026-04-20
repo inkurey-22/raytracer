@@ -1,0 +1,27 @@
+[camera]
+fov = 60.0
+position = { x = 0.0, y = 1.0, z = -5.0 }
+direction = { x = 0.0, y = 0.0, z = 1.0 }
+
+[[lights]]
+position = { x = 5.0, y = 10.0, z = -2.0 }
+color = { x = 1.0, y = 1.0, z = 1.0 }
+intensity = 300.0
+
+[[lights]]
+position = { x = -3.0, y = 6.0, z = 4.0 }
+color = { x = 1.0, y = 0.85, z = 0.7 }
+intensity = 0.8
+
+[[lights]]
+position = { x = 0.0, y = 4.0, z = -8.0 }
+color = { x = 0.6, y = 0.75, z = 1.0 }
+intensity = 500.0
+
+[[spheres]]
+center = { x = 0.0, y = 0.0, z = 5.0 }
+radius = 1.25
+
+[[spheres]]
+center = { x = -2.0, y = -0.5, z = 7.5 }
+radius = 0.75

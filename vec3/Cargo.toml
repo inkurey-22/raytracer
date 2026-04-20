@@ -1,0 +1,8 @@
+[package]
+name = "vec3"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "vec3"
+path = "src/lib.rs"

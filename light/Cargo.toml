@@ -1,0 +1,11 @@
+[package]
+name = "light"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "light"
+path = "src/lib.rs"
+
+[dependencies]
+vec3 = { path = "../vec3" }
