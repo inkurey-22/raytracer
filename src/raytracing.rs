@@ -167,21 +167,22 @@ pub fn write_ppm(filename: &str, image: &[Vec<Vec3>]) -> std::io::Result<()> {
     let height = image.len();
     let width = if height > 0 { image[0].len() } else { 0 };
 
-    let mut file = File::create(filename)?;
-
-    writeln!(file, "P3")?;
-    writeln!(file, "{} {}", width, height)?;
-    writeln!(file, "255")?;
+    let mut buffer = String::new();
+    buffer.push_str("P3\n");
+    buffer.push_str(&format!("{} {}\n", width, height));
+    buffer.push_str("255\n");
 
     for row in image {
         for pixel in row {
             let r = (pixel.x * 255.0) as u8;
             let g = (pixel.y * 255.0) as u8;
             let b = (pixel.z * 255.0) as u8;
-            write!(file, "{} {} {} ", r, g, b)?;
+            buffer.push_str(&format!("{} {} {} ", r, g, b));
         }
-        writeln!(file)?;
+        buffer.push('\n');
     }
 
+    let mut file = File::create(filename)?;
+    file.write_all(buffer.as_bytes())?;
     Ok(())
 }
