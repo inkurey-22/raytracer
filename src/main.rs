@@ -1,14 +1,43 @@
-use std::env;
-
+mod args;
 mod config_parse;
+mod raytracing;
 mod utilities;
 
-fn main() -> Result<(), config::ConfigError> {
-    let config_path = env::args().nth(1).ok_or_else(|| {
-        config::ConfigError::Message("Usage: raytracer <path/to/config.toml>".to_string())
+use args::Args;
+use raytracing::{render, write_ppm};
+use std::path::Path;
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args = Args::parse().map_err(|msg| {
+        eprintln!("{}", msg);
+        std::process::exit(1);
     })?;
 
-    let scene = config_parse::load_scene(&config_path)?;
+    let scene = config_parse::load_scene(&args.config)?;
     println!("{}", scene);
+
+    let output_path = args.output.unwrap_or_else(|| {
+        let config_path = Path::new(&args.config);
+        let stem = config_path.file_stem().unwrap().to_string_lossy();
+        format!("{}.ppm", stem)
+    });
+
+    let width = args.width.unwrap_or(scene.width);
+    let height = args.height.unwrap_or(scene.height);
+
+    println!("Rendering {}x{}...", width, height);
+    let image = render(
+        &scene.camera,
+        &scene.lights,
+        &scene.spheres,
+        &scene.planes,
+        width,
+        height,
+    );
+
+    println!("Writing to {}...", output_path);
+    write_ppm(&output_path, &image)?;
+    println!("Done!");
+
     Ok(())
 }

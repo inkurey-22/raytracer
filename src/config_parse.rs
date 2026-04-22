@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::utilities::{Camera, Light, SceneConfig, Sphere, Vec3};
+use crate::utilities::{Camera, Light, Plane, SceneConfig, Sphere, Vec3};
 
 fn required_float(settings: &config::Config, key: &str) -> Result<f64, config::ConfigError> {
     settings.get_float(key).map_err(|_| {
@@ -47,6 +47,38 @@ fn value_to_vec3(value: config::Value, context: &str) -> Result<Vec3, config::Co
     })
 }
 
+fn value_to_color(value: config::Value, context: &str) -> Result<Vec3, config::ConfigError> {
+    let table = value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!("Invalid {context}: expected a table"))
+    })?;
+
+    let r = table
+        .get("r")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.r")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.r")))?
+        / 255.0;
+
+    let g = table
+        .get("g")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.g")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.g")))?
+        / 255.0;
+
+    let b = table
+        .get("b")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.b")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.b")))?
+        / 255.0;
+
+    Ok(Vec3 { x: r, y: g, z: b })
+}
+
 fn parse_light(light_value: config::Value, index: usize) -> Result<Light, config::ConfigError> {
     let light_table = light_value.into_table().map_err(|_| {
         config::ConfigError::Message(format!(
@@ -60,7 +92,7 @@ fn parse_light(light_value: config::Value, index: usize) -> Result<Light, config
         .ok_or_else(|| config::ConfigError::Message(format!("Missing light[{index}].position")))?;
 
     let color = if let Some(color) = light_table.get("color") {
-        value_to_vec3(color.clone(), &format!("light[{index}].color"))?
+        value_to_color(color.clone(), &format!("light[{index}].color"))?
     } else {
         Vec3 {
             x: 1.0,
@@ -109,6 +141,29 @@ fn parse_sphere(sphere_value: config::Value, index: usize) -> Result<Sphere, con
     })
 }
 
+fn parse_plane(plane_value: config::Value, index: usize) -> Result<Plane, config::ConfigError> {
+    let plane_table = plane_value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!(
+            "Invalid plane entry at index {index}: expected a table"
+        ))
+    })?;
+
+    let point = plane_table
+        .get("point")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing plane[{index}].point")))?;
+
+    let normal = plane_table
+        .get("normal")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing plane[{index}].normal")))?;
+
+    Ok(Plane::new(
+        value_to_vec3(point, &format!("plane[{index}].point"))?,
+        value_to_vec3(normal, &format!("plane[{index}].normal"))?,
+    ))
+}
+
 pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError> {
     let settings = config::Config::builder()
         .add_source(config::File::from(Path::new(config_path)))
@@ -142,9 +197,33 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         Err(_) => Vec::new(),
     };
 
+    let planes = match settings.get_array("planes") {
+        Ok(plane_values) => plane_values
+            .into_iter()
+            .enumerate()
+            .map(|(index, plane_value)| parse_plane(plane_value, index))
+            .collect::<Result<Vec<_>, _>>()?,
+        Err(_) => Vec::new(),
+    };
+
+    let width = settings
+        .get_int("render.width")
+        .ok()
+        .and_then(|w| usize::try_from(w).ok())
+        .unwrap_or(800);
+
+    let height = settings
+        .get_int("render.height")
+        .ok()
+        .and_then(|h| usize::try_from(h).ok())
+        .unwrap_or(600);
+
     Ok(SceneConfig {
         camera,
         lights,
         spheres,
+        planes,
+        width,
+        height,
     })
 }

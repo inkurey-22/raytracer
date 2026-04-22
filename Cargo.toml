@@ -8,4 +8,6 @@ config = { version = "0.15.22", default-features = false, features = ["toml"] }
 vec3 = { path = "crates/vec3" }
 camera = { path = "crates/camera" }
 light = { path = "crates/light" }
+plane = { path = "crates/plane" }
 sphere = { path = "crates/sphere" }
+ray = { path = "crates/ray" }

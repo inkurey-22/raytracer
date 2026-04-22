@@ -41,6 +41,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
 
 [[package]]
+name = "plane"
+version = "0.1.0"
+dependencies = [
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -59,12 +67,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ray"
+version = "0.1.0"
+dependencies = [
+ "vec3",
+]
+
+[[package]]
 name = "raytracer"
 version = "0.1.0"
 dependencies = [
  "camera",
  "config",
  "light",
+ "plane",
+ "ray",
  "sphere",
  "vec3",
 ]
@@ -102,6 +119,7 @@ dependencies = [
 name = "sphere"
 version = "0.1.0"
 dependencies = [
+ "ray",
  "vec3",
 ]
 
