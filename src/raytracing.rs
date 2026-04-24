@@ -1,11 +1,14 @@
 use std::f64;
+use std::sync::{Arc, Mutex};
+use std::thread;
+
+use vec3::Vec3;
 
 use camera::Camera;
 use omni_light::OmniLight;
 use plane::Plane;
 use ray::{EPSILON, Ray};
 use sphere::Sphere;
-use vec3::Vec3;
 
 const MAX_RECURSION: i32 = 22;
 
@@ -28,30 +31,30 @@ pub fn find_closest_hit(ray: &Ray, spheres: &[Sphere], planes: &[Plane]) -> Opti
     let mut hit_info: Option<HitInfo> = None;
 
     for sphere in spheres {
-        if let Some(hit) = sphere.intersect(ray, EPSILON) {
-            if hit.t < closest_t {
-                closest_t = hit.t;
-                hit_info = Some(HitInfo {
-                    t: hit.t,
-                    point: hit.point,
-                    normal: hit.normal,
-                    object_type: ObjectType::Sphere,
-                });
-            }
+        if let Some(hit) = sphere.intersect(ray, EPSILON)
+            && hit.t < closest_t
+        {
+            closest_t = hit.t;
+            hit_info = Some(HitInfo {
+                t: hit.t,
+                point: hit.point,
+                normal: hit.normal,
+                object_type: ObjectType::Sphere,
+            });
         }
     }
 
     for plane in planes {
-        if let Some(hit) = plane.intersect(ray, EPSILON) {
-            if hit.t < closest_t {
-                closest_t = hit.t;
-                hit_info = Some(HitInfo {
-                    t: hit.t,
-                    point: hit.point,
-                    normal: hit.normal,
-                    object_type: ObjectType::Plane,
-                });
-            }
+        if let Some(hit) = plane.intersect(ray, EPSILON)
+            && hit.t < closest_t
+        {
+            closest_t = hit.t;
+            hit_info = Some(HitInfo {
+                t: hit.t,
+                point: hit.point,
+                normal: hit.normal,
+                object_type: ObjectType::Plane,
+            });
         }
     }
 
@@ -73,7 +76,7 @@ pub fn compute_lighting(
 
         let shadow_ray: Ray = Ray::new(hit_point + normal * EPSILON, light_dir);
         let in_shadow =
-            find_closest_hit(&shadow_ray, spheres, planes).map_or(false, |hit| hit.t < distance);
+            find_closest_hit(&shadow_ray, spheres, planes).is_some_and(|hit| hit.t < distance);
 
         if in_shadow {
             continue;
@@ -82,7 +85,7 @@ pub fn compute_lighting(
         let diffuse_intensity = normal.dot(&light_dir).max(0.0);
         let diffuse = light.color * (light.intensity / (distance * distance)) * diffuse_intensity;
 
-        color = color + diffuse;
+        color += diffuse;
     }
 
     color
@@ -148,16 +151,50 @@ pub fn render(
     width: usize,
     height: usize,
 ) -> Vec<Vec<Vec3>> {
-    let mut image = vec![vec![Vec3::default(); width]; height];
+    let shared_camera = Arc::new(*camera);
+    let shared_lights = Arc::new(lights.to_vec());
+    let shared_spheres = Arc::new(spheres.to_vec());
+    let shared_planes = Arc::new(planes.to_vec());
 
-    for y in 0..height {
-        for x in 0..width {
-            let ray = generate_ray(camera, x as f64, y as f64, width as f64, height as f64);
-            image[y][x] = trace_ray(&ray, omni_lights, spheres, planes, 0);
-        }
+    let image = Arc::new(Mutex::new(vec![vec![Vec3::default(); width]; height]));
+
+    let max_threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(4)
+        .min(height);
+    let mut handles = Vec::new();
+
+    let rows_per_thread = height.div_ceil(max_threads);
+    for thread_id in 0..max_threads {
+        let camera = Arc::clone(&shared_camera);
+        let lights = Arc::clone(&shared_lights);
+        let spheres = Arc::clone(&shared_spheres);
+        let planes = Arc::clone(&shared_planes);
+        let image = Arc::clone(&image);
+
+        let start_row = thread_id * rows_per_thread;
+        let end_row = ((thread_id + 1) * rows_per_thread).min(height);
+
+        let handle = thread::spawn(move || {
+            for y in start_row..end_row {
+                let mut row = vec![Vec3::default(); width];
+                for (x, pixel) in row.iter_mut().enumerate() {
+                    let ray =
+                        generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
+                    *pixel = trace_ray(&ray, &lights, &spheres, &planes, 0);
+                }
+                let mut img = image.lock().unwrap();
+                img[y] = row;
+            }
+        });
+        handles.push(handle);
     }
 
-    image
+    for handle in handles {
+        handle.join().unwrap();
+    }
+
+    Arc::try_unwrap(image).unwrap().into_inner().unwrap()
 }
 
 pub fn write_ppm(filename: &str, image: &[Vec<Vec3>]) -> std::io::Result<()> {
