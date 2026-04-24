@@ -3,15 +3,15 @@ use std::fmt;
 use vec3::Vec3;
 
 #[derive(Debug, Clone, Copy)]
-pub struct Light {
+pub struct OmniLight {
     pub position: Vec3,
     pub color: Vec3,
     pub intensity: f64,
 }
 
-impl Default for Light {
+impl Default for OmniLight {
     fn default() -> Self {
-        Light {
+        OmniLight {
             position: Vec3::default(),
             color: Vec3 {
                 x: 1.0,
@@ -23,9 +23,9 @@ impl Default for Light {
     }
 }
 
-impl fmt::Display for Light {
+impl fmt::Display for OmniLight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Light")?;
+        writeln!(f, "OmniLight")?;
         writeln!(f, "  position: {}", self.position)?;
         writeln!(f, "  color: {}", self.color)?;
         write!(f, "  intensity: {:.3}", self.intensity)

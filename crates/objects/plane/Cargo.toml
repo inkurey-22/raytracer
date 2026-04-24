@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-vec3 = { path = "../vec3" }
-ray = { path = "../ray" }
+vec3 = { path = "../../vec3" }
+ray = { path = "../../ray" }
