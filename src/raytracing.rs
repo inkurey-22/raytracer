@@ -5,7 +5,7 @@ use std::thread;
 use vec3::Vec3;
 
 use camera::Camera;
-use light::Light;
+use omni_light::OmniLight;
 use plane::Plane;
 use ray::{EPSILON, Ray};
 use sphere::Sphere;
@@ -64,13 +64,13 @@ pub fn find_closest_hit(ray: &Ray, spheres: &[Sphere], planes: &[Plane]) -> Opti
 pub fn compute_lighting(
     hit_point: Vec3,
     normal: Vec3,
-    lights: &[Light],
+    omni_lights: &[OmniLight],
     spheres: &[Sphere],
     planes: &[Plane],
 ) -> Vec3 {
     let mut color = Vec3::new(0.0, 0.0, 0.0);
 
-    for light in lights {
+    for light in omni_lights {
         let light_dir = (light.position - hit_point).normalize();
         let distance = (light.position - hit_point).length();
 
@@ -93,7 +93,7 @@ pub fn compute_lighting(
 
 pub fn trace_ray(
     ray: &Ray,
-    lights: &[Light],
+    omni_lights: &[OmniLight],
     spheres: &[Sphere],
     planes: &[Plane],
     depth: i32,
@@ -104,7 +104,7 @@ pub fn trace_ray(
 
     match find_closest_hit(ray, spheres, planes) {
         Some(hit) => {
-            let lighting = compute_lighting(hit.point, hit.normal, lights, spheres, planes);
+            let lighting = compute_lighting(hit.point, hit.normal, omni_lights, spheres, planes);
 
             let object_color = match hit.object_type {
                 ObjectType::Sphere => Vec3::new(0.9, 0.9, 0.9),
@@ -145,7 +145,7 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
 
 pub fn render(
     camera: &Camera,
-    lights: &[Light],
+    omni_lights: &[OmniLight],
     spheres: &[Sphere],
     planes: &[Plane],
     width: usize,

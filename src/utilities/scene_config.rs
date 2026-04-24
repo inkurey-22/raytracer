@@ -1,11 +1,11 @@
 use std::fmt;
 
-use super::{Camera, Light, Plane, Sphere};
+use super::{Camera, OmniLight, Plane, Sphere};
 
 #[derive(Debug, Clone)]
 pub struct SceneConfig {
     pub camera: Camera,
-    pub lights: Vec<Light>,
+    pub omni_lights: Vec<OmniLight>,
     pub spheres: Vec<Sphere>,
     pub planes: Vec<Plane>,
     pub width: usize,
@@ -17,11 +17,11 @@ impl fmt::Display for SceneConfig {
         writeln!(f, "Scene")?;
         writeln!(f, "{}", self.camera)?;
 
-        if self.lights.is_empty() {
+        if self.omni_lights.is_empty() {
             writeln!(f, "Lights: none")?;
         } else {
-            writeln!(f, "Lights: {}", self.lights.len())?;
-            for (index, light) in self.lights.iter().enumerate() {
+            writeln!(f, "Lights: {}", self.omni_lights.len())?;
+            for (index, light) in self.omni_lights.iter().enumerate() {
                 if index > 0 {
                     writeln!(f)?;
                 }

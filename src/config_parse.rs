@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::utilities::{Camera, Light, Plane, SceneConfig, Sphere, Vec3};
+use crate::utilities::{Camera, OmniLight, Plane, SceneConfig, Sphere, Vec3};
 
 fn required_float(settings: &config::Config, key: &str) -> Result<f64, config::ConfigError> {
     settings.get_float(key).map_err(|_| {
@@ -79,7 +79,10 @@ fn value_to_color(value: config::Value, context: &str) -> Result<Vec3, config::C
     Ok(Vec3 { x: r, y: g, z: b })
 }
 
-fn parse_light(light_value: config::Value, index: usize) -> Result<Light, config::ConfigError> {
+fn parse_omni_light(
+    light_value: config::Value,
+    index: usize,
+) -> Result<OmniLight, config::ConfigError> {
     let light_table = light_value.into_table().map_err(|_| {
         config::ConfigError::Message(format!(
             "Invalid light entry at index {index}: expected a table"
@@ -109,7 +112,7 @@ fn parse_light(light_value: config::Value, index: usize) -> Result<Light, config
         1000.0
     };
 
-    Ok(Light {
+    Ok(OmniLight {
         position: value_to_vec3(position, &format!("light[{index}].position"))?,
         color,
         intensity,
@@ -183,7 +186,7 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         Ok(light_values) => light_values
             .into_iter()
             .enumerate()
-            .map(|(index, light_value)| parse_light(light_value, index))
+            .map(|(index, light_value)| parse_omni_light(light_value, index))
             .collect::<Result<Vec<_>, _>>()?,
         Err(_) => Vec::new(),
     };
@@ -220,7 +223,7 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
 
     Ok(SceneConfig {
         camera,
-        lights,
+        omni_lights: lights,
         spheres,
         planes,
         width,
