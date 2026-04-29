@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  compile:
     runs-on: ubuntu-latest
     container:
       image: rust:trixie
@@ -18,18 +18,30 @@ jobs:
       - name: Build
         run: cargo build
 
-      - name: Test
-        run: cargo test
-
       - name: Install Clippy
         run: rustup component add clippy
 
       - name: Clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
 
+  tests:
+    runs-on: ubuntu-latest
+    container:
+      image: rust:trixie
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Test
+        run: cargo test
+
+  mirror:
+    runs-on: ubuntu-latest
+    needs: [compile, tests]
+    steps:
       - name: Mirror to repo
         if: ${{ success() && github.event_name == 'push' }}
         uses: pixta-dev/repository-mirroring-action@v1
         with:
-          target_repo_url: https://github.com/EpitechPGE2-2025/G-OOP-400-LIL-4-1-raytracer-1.git
+          target_repo_url: git@github.com:EpitechPGE2-2025/G-OOP-400-LIL-4-1-raytracer-1.git
           ssh_private_key: ${{ secrets.MIRROR_SSH_KEY }}
