@@ -3,7 +3,7 @@
 version = 4
 
 [[package]]
-name = "light"
+name = "omni_light"
 version = "0.1.0"
 dependencies = [
  "vec3",

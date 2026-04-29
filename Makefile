@@ -3,8 +3,9 @@
 NAME = raytracer
 
 CRATE_DIRS = crates/camera \
-			 crates/light \
-			 crates/sphere \
+			 crates/lights/omni_light \
+			 crates/objects/sphere \
+			 crates/objects/plane \
 			 crates/vec3 \
 
 all:

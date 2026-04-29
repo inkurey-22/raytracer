@@ -3,17 +3,17 @@
 version = 4
 
 [[package]]
-name = "ray"
+name = "plane"
 version = "0.1.0"
 dependencies = [
+ "ray",
  "vec3",
 ]
 
 [[package]]
-name = "sphere"
+name = "ray"
 version = "0.1.0"
 dependencies = [
- "ray",
  "vec3",
 ]
 
