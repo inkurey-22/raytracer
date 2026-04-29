@@ -9,19 +9,6 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub fn normalize_max(&self) -> Vec3 {
-        let max_val = self.x.max(self.y).max(self.z);
-        if max_val > 1.0 {
-            Vec3 {
-                x: self.x / max_val,
-                y: self.y / max_val,
-                z: self.z / max_val,
-            }
-        } else {
-            *self
-        }
-    }
-
     pub const fn new(x: f64, y: f64, z: f64) -> Self {
         Self { x, y, z }
     }
@@ -52,14 +39,6 @@ impl Vec3 {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
-        }
-    }
-
-    pub fn saturate(&self) -> Vec3 {
-        Vec3 {
-            x: self.x.max(0.0).min(1.0),
-            y: self.y.max(0.0).min(1.0),
-            z: self.z.max(0.0).min(1.0),
         }
     }
 }
@@ -236,6 +215,18 @@ mod tests {
     }
 
     #[test]
+    fn test_vec3_normalize() {
+        let v1 = Vec3 {
+            x: 1.0,
+            y: 2.0,
+            z: 3.0,
+        };
+        let v2 = v1.normalize();
+        let l = v2.length();
+        assert!((l - 1.0).abs() < 1e-6);
+    }
+
+    #[test]
     fn test_vec3_dot() {
         let v1 = Vec3 {
             x: 1.0,
@@ -249,6 +240,29 @@ mod tests {
         };
         let d = v1.dot(&v2);
         assert_eq!(d, 32.0);
+    }
+
+    #[test]
+    fn test_vec3_cross() {
+        let v1 = Vec3 {
+            x: 1.0,
+            y: 2.0,
+            z: 3.0,
+        };
+        let v2 = Vec3 {
+            x: 4.0,
+            y: 5.0,
+            z: 6.0,
+        };
+        let v3 = v1.cross(&v2);
+        assert_eq!(
+            v3,
+            Vec3 {
+                x: -3.0,
+                y: 6.0,
+                z: -3.0,
+            }
+        );
     }
 
     #[test]

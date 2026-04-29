@@ -2,6 +2,7 @@ use std::f64;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use color::Color;
 use vec3::Vec3;
 
 use camera::Camera;
@@ -67,8 +68,8 @@ pub fn compute_lighting(
     omni_lights: &[OmniLight],
     spheres: &[Sphere],
     planes: &[Plane],
-) -> Vec3 {
-    let mut color = Vec3::new(0.0, 0.0, 0.0);
+) -> Color {
+    let mut color = Color::new(0.0, 0.0, 0.0);
 
     for light in omni_lights {
         let light_dir = (light.position - hit_point).normalize();
@@ -97,9 +98,9 @@ pub fn trace_ray(
     spheres: &[Sphere],
     planes: &[Plane],
     depth: i32,
-) -> Vec3 {
+) -> Color {
     if depth > MAX_RECURSION {
-        return Vec3::new(0.0, 0.0, 0.0);
+        return Color::new(0.0, 0.0, 0.0);
     }
 
     match find_closest_hit(ray, spheres, planes) {
@@ -107,15 +108,15 @@ pub fn trace_ray(
             let lighting = compute_lighting(hit.point, hit.normal, omni_lights, spheres, planes);
 
             let object_color = match hit.object_type {
-                ObjectType::Sphere => Vec3::new(0.9, 0.9, 0.9),
-                ObjectType::Plane => Vec3::new(1.0, 1.0, 1.0),
+                ObjectType::Sphere => Color::new(0.9, 0.9, 0.9),
+                ObjectType::Plane => Color::new(1.0, 1.0, 1.0),
             };
 
             object_color * lighting.normalize_max()
         }
         None => {
-            let t = 0.5 * (ray.direction.y + 1.0);
-            Vec3::new(1.0, 1.0, 1.0) * (1.0 - t) + Vec3::new(0.5, 0.7, 1.0) * t
+            let t = 0.5 * (ray.direction.x + 1.0);
+            Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
         }
     }
 }
@@ -150,13 +151,13 @@ pub fn render(
     planes: &[Plane],
     width: usize,
     height: usize,
-) -> Vec<Vec<Vec3>> {
+) -> Vec<Vec<Color>> {
     let shared_camera = Arc::new(*camera);
     let shared_lights = Arc::new(omni_lights.to_vec());
     let shared_spheres = Arc::new(spheres.to_vec());
     let shared_planes = Arc::new(planes.to_vec());
 
-    let image = Arc::new(Mutex::new(vec![vec![Vec3::default(); width]; height]));
+    let image = Arc::new(Mutex::new(vec![vec![Color::default(); width]; height]));
 
     let max_threads = std::thread::available_parallelism()
         .map(|n| n.get())
@@ -177,7 +178,7 @@ pub fn render(
 
         let handle = thread::spawn(move || {
             for y in start_row..end_row {
-                let mut row = vec![Vec3::default(); width];
+                let mut row = vec![Color::default(); width];
                 for (x, pixel) in row.iter_mut().enumerate() {
                     let ray =
                         generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
@@ -197,7 +198,7 @@ pub fn render(
     Arc::try_unwrap(image).unwrap().into_inner().unwrap()
 }
 
-pub fn write_ppm(filename: &str, image: &[Vec<Vec3>]) -> std::io::Result<()> {
+pub fn write_ppm(filename: &str, image: &[Vec<Color>]) -> std::io::Result<()> {
     use std::fs::File;
     use std::io::Write;
 
@@ -211,9 +212,9 @@ pub fn write_ppm(filename: &str, image: &[Vec<Vec3>]) -> std::io::Result<()> {
 
     for row in image {
         for pixel in row {
-            let r = (pixel.x * 255.0) as u8;
-            let g = (pixel.y * 255.0) as u8;
-            let b = (pixel.z * 255.0) as u8;
+            let r = (pixel.r * 255.0) as u8;
+            let g = (pixel.g * 255.0) as u8;
+            let b = (pixel.b * 255.0) as u8;
             buffer.push_str(&format!("{} {} {} ", r, g, b));
         }
         buffer.push('\n');

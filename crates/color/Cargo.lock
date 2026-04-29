@@ -5,15 +5,3 @@ version = 4
 [[package]]
 name = "color"
 version = "0.1.0"
-
-[[package]]
-name = "omni_light"
-version = "0.1.0"
-dependencies = [
- "color",
- "vec3",
-]
-
-[[package]]
-name = "vec3"
-version = "0.1.0"
