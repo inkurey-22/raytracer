@@ -77,7 +77,7 @@ fn value_to_color(value: config::Value, context: &str) -> Result<Color, config::
         .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.b")))?
         / 255.0;
 
-    Ok(Color { r: r, g: g, b: b })
+    Ok(Color { r, g, b })
 }
 
 fn parse_omni_light(
