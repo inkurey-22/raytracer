@@ -152,7 +152,7 @@ pub fn render(
     height: usize,
 ) -> Vec<Vec<Vec3>> {
     let shared_camera = Arc::new(*camera);
-    let shared_lights = Arc::new(lights.to_vec());
+    let shared_lights = Arc::new(omni_lights.to_vec());
     let shared_spheres = Arc::new(spheres.to_vec());
     let shared_planes = Arc::new(planes.to_vec());
 
