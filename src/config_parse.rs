@@ -1,3 +1,4 @@
+use color::Color;
 use std::path::Path;
 
 use crate::utilities::{Camera, OmniLight, Plane, SceneConfig, Sphere, Vec3};
@@ -47,7 +48,7 @@ fn value_to_vec3(value: config::Value, context: &str) -> Result<Vec3, config::Co
     })
 }
 
-fn value_to_color(value: config::Value, context: &str) -> Result<Vec3, config::ConfigError> {
+fn value_to_color(value: config::Value, context: &str) -> Result<Color, config::ConfigError> {
     let table = value.into_table().map_err(|_| {
         config::ConfigError::Message(format!("Invalid {context}: expected a table"))
     })?;
@@ -76,7 +77,7 @@ fn value_to_color(value: config::Value, context: &str) -> Result<Vec3, config::C
         .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.b")))?
         / 255.0;
 
-    Ok(Vec3 { x: r, y: g, z: b })
+    Ok(Color { r, g, b })
 }
 
 fn parse_omni_light(
@@ -97,10 +98,10 @@ fn parse_omni_light(
     let color = if let Some(color) = light_table.get("color") {
         value_to_color(color.clone(), &format!("light[{index}].color"))?
     } else {
-        Vec3 {
-            x: 1.0,
-            y: 1.0,
-            z: 1.0,
+        Color {
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
         }
     };
 

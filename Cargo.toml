@@ -6,8 +6,9 @@ edition = "2024"
 [dependencies]
 config = { version = "0.15.22", default-features = false, features = ["toml"] }
 vec3 = { path = "crates/vec3" }
+ray = { path = "crates/ray" }
+color = { path = "crates/color" }
 camera = { path = "crates/camera" }
 omni_light = { path = "crates/lights/omni_light" }
 plane = { path = "crates/objects/plane" }
 sphere = { path = "crates/objects/sphere" }
-ray = { path = "crates/ray" }

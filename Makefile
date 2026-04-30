@@ -2,11 +2,12 @@
 
 NAME = raytracer
 
-CRATE_DIRS = crates/camera \
-			 crates/lights/omni_light \
+CRATE_DIRS = crates/vec3 \
+			 crates/color \
+			 crates/camera \
 			 crates/objects/sphere \
 			 crates/objects/plane \
-			 crates/vec3 \
+			 crates/lights/omni_light \
 
 all:
 	cargo build --release
