@@ -1,7 +1,7 @@
 use color::Color;
 use std::path::Path;
 
-use crate::utilities::{Camera, OmniLight, Plane, SceneConfig, Sphere, Vec3};
+use crate::utilities::{Camera, DirectionalLight, OmniLight, Plane, SceneConfig, Sphere, Vec3};
 
 fn required_float(settings: &config::Config, key: &str) -> Result<f64, config::ConfigError> {
     settings.get_float(key).map_err(|_| {
@@ -168,6 +168,46 @@ fn parse_plane(plane_value: config::Value, index: usize) -> Result<Plane, config
     ))
 }
 
+fn parse_directional_light(
+    light_value: config::Value,
+    index: usize,
+) -> Result<DirectionalLight, config::ConfigError> {
+    let light_table = light_value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!(
+            "Invalid directional_light entry at index {index}: expected a table"
+        ))
+    })?;
+
+    let direction = light_table
+        .get("direction")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing directional_lights[{index}].direction")))?;
+
+    let color = if let Some(color) = light_table.get("color") {
+        value_to_color(color.clone(), &format!("directional_lights[{index}].color"))?
+    } else {
+        Color {
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
+        }
+    };
+
+    let intensity = if let Some(intensity) = light_table.get("intensity") {
+        intensity.clone().into_float().map_err(|_| {
+            config::ConfigError::Message(format!("Invalid directional_lights[{index}].intensity"))
+        })?
+    } else {
+        1.0
+    };
+
+    Ok(DirectionalLight {
+        direction: value_to_vec3(direction, &format!("directional_lights[{index}].direction"))?.normalize(),
+        color,
+        intensity,
+    })
+}
+
 pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError> {
     let settings = config::Config::builder()
         .add_source(config::File::from(Path::new(config_path)))
@@ -188,6 +228,15 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
             .into_iter()
             .enumerate()
             .map(|(index, light_value)| parse_omni_light(light_value, index))
+            .collect::<Result<Vec<_>, _>>()?,
+        Err(_) => Vec::new(),
+    };
+
+    let directional_lights = match settings.get_array("directional_lights") {
+        Ok(light_values) => light_values
+            .into_iter()
+            .enumerate()
+            .map(|(index, light_value)| parse_directional_light(light_value, index))
             .collect::<Result<Vec<_>, _>>()?,
         Err(_) => Vec::new(),
     };
@@ -225,6 +274,7 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
     Ok(SceneConfig {
         camera,
         omni_lights: lights,
+        directional_lights,
         spheres,
         planes,
         width,

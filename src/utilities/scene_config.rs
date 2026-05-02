@@ -1,11 +1,12 @@
 use std::fmt;
 
-use super::{Camera, OmniLight, Plane, Sphere};
+use super::{Camera, DirectionalLight, OmniLight, Plane, Sphere};
 
 #[derive(Debug, Clone)]
 pub struct SceneConfig {
     pub camera: Camera,
     pub omni_lights: Vec<OmniLight>,
+    pub directional_lights: Vec<DirectionalLight>,
     pub spheres: Vec<Sphere>,
     pub planes: Vec<Plane>,
     pub width: usize,
@@ -17,16 +18,25 @@ impl fmt::Display for SceneConfig {
         writeln!(f, "Scene")?;
         writeln!(f, "{}", self.camera)?;
 
-        if self.omni_lights.is_empty() {
+        if self.omni_lights.is_empty() && self.directional_lights.is_empty() {
             writeln!(f, "Lights: none")?;
         } else {
-            writeln!(f, "Lights: {}", self.omni_lights.len())?;
+            writeln!(f, "Lights: {} omni + {} directional", self.omni_lights.len(), self.directional_lights.len())?;
             for (index, light) in self.omni_lights.iter().enumerate() {
                 if index > 0 {
                     writeln!(f)?;
                 }
-                writeln!(f, "  #{}", index)?;
+                writeln!(f, "  Omni #{}", index)?;
                 writeln!(f, "    position: {}", light.position)?;
+                writeln!(f, "    color: {}", light.color)?;
+                write!(f, "    intensity: {:.3}", light.intensity)?;
+            }
+            for (index, light) in self.directional_lights.iter().enumerate() {
+                if index > 0 || !self.omni_lights.is_empty() {
+                    writeln!(f)?;
+                }
+                writeln!(f, "  Directional #{}", index)?;
+                writeln!(f, "    direction: {}", light.direction)?;
                 writeln!(f, "    color: {}", light.color)?;
                 write!(f, "    intensity: {:.3}", light.intensity)?;
             }

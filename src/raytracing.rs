@@ -6,6 +6,7 @@ use color::Color;
 use vec3::Vec3;
 
 use camera::Camera;
+use directional_light::DirectionalLight;
 use omni_light::OmniLight;
 use plane::Plane;
 use ray::{EPSILON, Ray};
@@ -66,6 +67,7 @@ pub fn compute_lighting(
     hit_point: Vec3,
     normal: Vec3,
     omni_lights: &[OmniLight],
+    directional_lights: &[DirectionalLight],
     spheres: &[Sphere],
     planes: &[Plane],
 ) -> Color {
@@ -89,12 +91,27 @@ pub fn compute_lighting(
         color += diffuse;
     }
 
+    for light in directional_lights {
+        let light_dir = -light.direction;
+
+        let shadow_ray: Ray = Ray::new(hit_point + normal * EPSILON, light_dir);
+        if find_closest_hit(&shadow_ray, spheres, planes).is_some() {
+            continue;
+        }
+
+        let diffuse_intensity = normal.dot(&light_dir).max(0.0);
+        let diffuse = light.color * light.intensity * diffuse_intensity;
+
+        color += diffuse;
+    }
+
     color
 }
 
 pub fn trace_ray(
     ray: &Ray,
     omni_lights: &[OmniLight],
+    directional_lights: &[DirectionalLight],
     spheres: &[Sphere],
     planes: &[Plane],
     depth: i32,
@@ -105,7 +122,7 @@ pub fn trace_ray(
 
     match find_closest_hit(ray, spheres, planes) {
         Some(hit) => {
-            let lighting = compute_lighting(hit.point, hit.normal, omni_lights, spheres, planes);
+            let lighting = compute_lighting(hit.point, hit.normal, omni_lights, directional_lights, spheres, planes);
 
             let object_color = match hit.object_type {
                 ObjectType::Sphere => Color::new(0.9, 0.9, 0.9),
@@ -147,13 +164,15 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
 pub fn render(
     camera: &Camera,
     omni_lights: &[OmniLight],
+    directional_lights: &[DirectionalLight],
     spheres: &[Sphere],
     planes: &[Plane],
     width: usize,
     height: usize,
 ) -> Vec<Vec<Color>> {
     let shared_camera = Arc::new(*camera);
-    let shared_lights = Arc::new(omni_lights.to_vec());
+    let shared_omni_lights = Arc::new(omni_lights.to_vec());
+    let shared_directional_lights = Arc::new(directional_lights.to_vec());
     let shared_spheres = Arc::new(spheres.to_vec());
     let shared_planes = Arc::new(planes.to_vec());
 
@@ -168,7 +187,8 @@ pub fn render(
     let rows_per_thread = height.div_ceil(max_threads);
     for thread_id in 0..max_threads {
         let camera = Arc::clone(&shared_camera);
-        let lights = Arc::clone(&shared_lights);
+        let omni_lights = Arc::clone(&shared_omni_lights);
+        let directional_lights = Arc::clone(&shared_directional_lights);
         let spheres = Arc::clone(&shared_spheres);
         let planes = Arc::clone(&shared_planes);
         let image = Arc::clone(&image);
@@ -182,7 +202,7 @@ pub fn render(
                 for (x, pixel) in row.iter_mut().enumerate() {
                     let ray =
                         generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
-                    *pixel = trace_ray(&ray, &lights, &spheres, &planes, 0);
+                    *pixel = trace_ray(&ray, &omni_lights, &directional_lights, &spheres, &planes, 0);
                 }
                 let mut img = image.lock().unwrap();
                 img[y] = row;

@@ -1,0 +1,8 @@
+[package]
+name = "directional_light"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+color = { path = "../../color" }
+vec3 = { path = "../../vec3" }

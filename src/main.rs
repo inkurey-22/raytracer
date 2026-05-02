@@ -29,6 +29,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let image = render(
         &scene.camera,
         &scene.omni_lights,
+        &scene.directional_lights,
         &scene.spheres,
         &scene.planes,
         width,
