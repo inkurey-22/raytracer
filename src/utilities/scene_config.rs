@@ -21,7 +21,12 @@ impl fmt::Display for SceneConfig {
         if self.omni_lights.is_empty() && self.directional_lights.is_empty() {
             writeln!(f, "Lights: none")?;
         } else {
-            writeln!(f, "Lights: {} omni + {} directional", self.omni_lights.len(), self.directional_lights.len())?;
+            writeln!(
+                f,
+                "Lights: {} omni + {} directional",
+                self.omni_lights.len(),
+                self.directional_lights.len()
+            )?;
             for (index, light) in self.omni_lights.iter().enumerate() {
                 if index > 0 {
                     writeln!(f)?;

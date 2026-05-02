@@ -178,10 +178,9 @@ fn parse_directional_light(
         ))
     })?;
 
-    let direction = light_table
-        .get("direction")
-        .cloned()
-        .ok_or_else(|| config::ConfigError::Message(format!("Missing directional_lights[{index}].direction")))?;
+    let direction = light_table.get("direction").cloned().ok_or_else(|| {
+        config::ConfigError::Message(format!("Missing directional_lights[{index}].direction"))
+    })?;
 
     let color = if let Some(color) = light_table.get("color") {
         value_to_color(color.clone(), &format!("directional_lights[{index}].color"))?
@@ -202,7 +201,8 @@ fn parse_directional_light(
     };
 
     Ok(DirectionalLight {
-        direction: value_to_vec3(direction, &format!("directional_lights[{index}].direction"))?.normalize(),
+        direction: value_to_vec3(direction, &format!("directional_lights[{index}].direction"))?
+            .normalize(),
         color,
         intensity,
     })

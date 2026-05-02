@@ -122,7 +122,14 @@ pub fn trace_ray(
 
     match find_closest_hit(ray, spheres, planes) {
         Some(hit) => {
-            let lighting = compute_lighting(hit.point, hit.normal, omni_lights, directional_lights, spheres, planes);
+            let lighting = compute_lighting(
+                hit.point,
+                hit.normal,
+                omni_lights,
+                directional_lights,
+                spheres,
+                planes,
+            );
 
             let object_color = match hit.object_type {
                 ObjectType::Sphere => Color::new(0.9, 0.9, 0.9),
@@ -202,7 +209,14 @@ pub fn render(
                 for (x, pixel) in row.iter_mut().enumerate() {
                     let ray =
                         generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
-                    *pixel = trace_ray(&ray, &omni_lights, &directional_lights, &spheres, &planes, 0);
+                    *pixel = trace_ray(
+                        &ray,
+                        &omni_lights,
+                        &directional_lights,
+                        &spheres,
+                        &planes,
+                        0,
+                    );
                 }
                 let mut img = image.lock().unwrap();
                 img[y] = row;
