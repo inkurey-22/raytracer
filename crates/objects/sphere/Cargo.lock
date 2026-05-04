@@ -3,6 +3,10 @@
 version = 4
 
 [[package]]
+name = "color"
+version = "0.1.0"
+
+[[package]]
 name = "ray"
 version = "0.1.0"
 dependencies = [
@@ -13,6 +17,7 @@ dependencies = [
 name = "sphere"
 version = "0.1.0"
 dependencies = [
+ "color",
  "ray",
  "vec3",
 ]

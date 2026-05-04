@@ -16,7 +16,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let scene = config_parse::load_scene(&args.config)?;
     println!("{}", scene);
 
-    let output_path = args.output.unwrap_or_else(|| {
+    todo!("remake render");
+    /*let output_path = args.output.unwrap_or_else(|| {
         let config_path = Path::new(&args.config);
         let stem = config_path.file_stem().unwrap().to_string_lossy();
         format!("{}.ppm", stem)
@@ -37,7 +38,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Writing to {}...", output_path);
     write_ppm(&output_path, &image)?;
-    println!("Done!");
+    println!("Done!");*/
 
     Ok(())
 }

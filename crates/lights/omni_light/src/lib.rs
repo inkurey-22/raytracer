@@ -27,8 +27,8 @@ impl Default for OmniLight {
 impl fmt::Display for OmniLight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "OmniLight")?;
-        writeln!(f, "  position: {}", self.position)?;
-        writeln!(f, "  color: {}", self.color)?;
-        write!(f, "  intensity: {:.3}", self.intensity)
+        writeln!(f, "      position: {}", self.position)?;
+        writeln!(f, "      color: {}", self.color)?;
+        writeln!(f, "      intensity: {:.3}", self.intensity)
     }
 }
