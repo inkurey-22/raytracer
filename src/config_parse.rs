@@ -1,9 +1,171 @@
 use std::path::Path;
 
-use crate::utilities::{
-    Camera, SceneConfig, light, light_builder, object, object_builder,
-    value_reading::{self, get_value_at},
-};
+use crate::utilities::{Camera, OmniLight, Plane, SceneConfig, Sphere, Vec3};
+
+fn required_float(settings: &config::Config, key: &str) -> Result<f64, config::ConfigError> {
+    settings.get_float(key).map_err(|_| {
+        config::ConfigError::Message(format!("Missing or invalid required key: {key}"))
+    })
+}
+
+fn required_vec3(settings: &config::Config, key: &str) -> Result<Vec3, config::ConfigError> {
+    settings.get_table(key).map_err(|_| {
+        config::ConfigError::Message(format!("Missing or invalid required key: {key}"))
+    })?;
+
+    Ok(Vec3 {
+        x: required_float(settings, &format!("{key}.x"))?,
+        y: required_float(settings, &format!("{key}.y"))?,
+        z: required_float(settings, &format!("{key}.z"))?,
+    })
+}
+
+fn value_to_vec3(value: config::Value, context: &str) -> Result<Vec3, config::ConfigError> {
+    let table = value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!("Invalid {context}: expected a table"))
+    })?;
+
+    Ok(Vec3 {
+        x: table
+            .get("x")
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.x")))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.x")))?,
+        y: table
+            .get("y")
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.y")))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.y")))?,
+        z: table
+            .get("z")
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.z")))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.z")))?,
+    })
+}
+
+fn value_to_color(value: config::Value, context: &str) -> Result<Color, config::ConfigError> {
+    let table = value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!("Invalid {context}: expected a table"))
+    })?;
+
+    let r = table
+        .get("r")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.r")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.r")))?
+        / 255.0;
+
+    let g = table
+        .get("g")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.g")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.g")))?
+        / 255.0;
+
+    let b = table
+        .get("b")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing {context}.b")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.b")))?
+        / 255.0;
+
+    Ok(Color { r, g, b })
+}
+
+fn parse_omni_light(
+    light_value: config::Value,
+    index: usize,
+) -> Result<OmniLight, config::ConfigError> {
+    let light_table = light_value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!(
+            "Invalid light entry at index {index}: expected a table"
+        ))
+    })?;
+
+    let position = light_table
+        .get("position")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing light[{index}].position")))?;
+
+    let color = if let Some(color) = light_table.get("color") {
+        value_to_color(color.clone(), &format!("light[{index}].color"))?
+    } else {
+        Color {
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
+        }
+    };
+
+    let intensity = if let Some(intensity) = light_table.get("intensity") {
+        intensity.clone().into_float().map_err(|_| {
+            config::ConfigError::Message(format!("Invalid light[{index}].intensity"))
+        })?
+    } else {
+        1000.0
+    };
+
+    Ok(OmniLight {
+        position: value_to_vec3(position, &format!("light[{index}].position"))?,
+        color,
+        intensity,
+    })
+}
+
+fn parse_sphere(sphere_value: config::Value, index: usize) -> Result<Sphere, config::ConfigError> {
+    let sphere_table = sphere_value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!(
+            "Invalid sphere entry at index {index}: expected a table"
+        ))
+    })?;
+
+    let center = sphere_table
+        .get("center")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing sphere[{index}].center")))?;
+
+    let radius = sphere_table
+        .get("radius")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing sphere[{index}].radius")))?
+        .into_float()
+        .map_err(|_| config::ConfigError::Message(format!("Invalid sphere[{index}].radius")))?;
+
+    Ok(Sphere {
+        center: value_to_vec3(center, &format!("sphere[{index}].center"))?,
+        radius,
+    })
+}
+
+fn parse_plane(plane_value: config::Value, index: usize) -> Result<Plane, config::ConfigError> {
+    let plane_table = plane_value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!(
+            "Invalid plane entry at index {index}: expected a table"
+        ))
+    })?;
+
+    let point = plane_table
+        .get("point")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing plane[{index}].point")))?;
+
+    let normal = plane_table
+        .get("normal")
+        .cloned()
+        .ok_or_else(|| config::ConfigError::Message(format!("Missing plane[{index}].normal")))?;
+
+    Ok(Plane::new(
+        value_to_vec3(point, &format!("plane[{index}].point"))?,
+        value_to_vec3(normal, &format!("plane[{index}].normal"))?,
+    ))
+}
 
 pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError> {
     let settings = config::Config::builder()
