@@ -1,5 +1,6 @@
 pub mod scene_config;
 
+pub use ambiant::AmbiantLight;
 pub use camera::Camera;
 pub use omni_light::OmniLight;
 pub use plane::Plane;

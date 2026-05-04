@@ -1,7 +1,7 @@
 use color::Color;
 use std::path::Path;
 
-use crate::utilities::{Camera, OmniLight, Plane, SceneConfig, Sphere, Vec3};
+use crate::utilities::{AmbiantLight, Camera, OmniLight, Plane, SceneConfig, Sphere, Vec3};
 
 fn required_float(settings: &config::Config, key: &str) -> Result<f64, config::ConfigError> {
     settings.get_float(key).map_err(|_| {
@@ -120,6 +120,36 @@ fn parse_omni_light(
     })
 }
 
+fn parse_ambiant_light(
+    light_value: config::Value,
+    context: &str,
+) -> Result<AmbiantLight, config::ConfigError> {
+    let light_table = light_value.into_table().map_err(|_| {
+        config::ConfigError::Message(format!("Invalid {context}: expected a table"))
+    })?;
+
+    let color = if let Some(color) = light_table.get("color") {
+        value_to_color(color.clone(), &format!("{context}.color"))?
+    } else {
+        Color {
+            r: 1.0,
+            g: 1.0,
+            b: 1.0,
+        }
+    };
+
+    let intensity = if let Some(intensity) = light_table.get("intensity") {
+        intensity
+            .clone()
+            .into_float()
+            .map_err(|_| config::ConfigError::Message(format!("Invalid {context}.intensity")))?
+    } else {
+        1.0
+    };
+
+    Ok(AmbiantLight { color, intensity })
+}
+
 fn parse_sphere(sphere_value: config::Value, index: usize) -> Result<Sphere, config::ConfigError> {
     let sphere_table = sphere_value.into_table().map_err(|_| {
         config::ConfigError::Message(format!(
@@ -192,6 +222,23 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         Err(_) => Vec::new(),
     };
 
+    let ambiant_light = if let Ok(light_table) = settings.get_table("ambiant_light") {
+        parse_ambiant_light(light_table.into(), "ambiant_light")?
+    } else {
+        match settings.get_array("ambiant_lights") {
+            Ok(light_values) => match light_values.as_slice() {
+                [] => AmbiantLight::default(),
+                [light_value] => parse_ambiant_light(light_value.clone(), "ambiant_lights[0]")?,
+                _ => {
+                    return Err(config::ConfigError::Message(
+                        "Only one ambient light is allowed. Use [ambiant_light] or a single [[ambiant_lights]] entry.".to_string(),
+                    ));
+                }
+            },
+            Err(_) => AmbiantLight::default(),
+        }
+    };
+
     let spheres = match settings.get_array("spheres") {
         Ok(sphere_values) => sphere_values
             .into_iter()
@@ -225,6 +272,7 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
     Ok(SceneConfig {
         camera,
         omni_lights: lights,
+        ambiant_light,
         spheres,
         planes,
         width,

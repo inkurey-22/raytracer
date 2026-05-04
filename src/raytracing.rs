@@ -2,6 +2,7 @@ use std::f64;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
+use ambiant::AmbiantLight;
 use color::Color;
 use vec3::Vec3;
 
@@ -94,6 +95,7 @@ pub fn compute_lighting(
 
 pub fn trace_ray(
     ray: &Ray,
+    ambiant_light: &AmbiantLight,
     omni_lights: &[OmniLight],
     spheres: &[Sphere],
     planes: &[Plane],
@@ -105,14 +107,17 @@ pub fn trace_ray(
 
     match find_closest_hit(ray, spheres, planes) {
         Some(hit) => {
-            let lighting = compute_lighting(hit.point, hit.normal, omni_lights, spheres, planes);
+            let diffuse_lighting =
+                compute_lighting(hit.point, hit.normal, omni_lights, spheres, planes);
 
             let object_color = match hit.object_type {
                 ObjectType::Sphere => Color::new(0.9, 0.9, 0.9),
                 ObjectType::Plane => Color::new(1.0, 1.0, 1.0),
             };
 
-            object_color * lighting.normalize_max()
+            let ambient_light_value = ambiant_light.color * ambiant_light.intensity;
+            let total_lighting = ambient_light_value + diffuse_lighting;
+            (object_color * total_lighting.normalize_max()).saturate()
         }
         None => {
             let t = 0.5 * (ray.direction.x + 1.0);
@@ -146,6 +151,7 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
 
 pub fn render(
     camera: &Camera,
+    ambiant_light: &AmbiantLight,
     omni_lights: &[OmniLight],
     spheres: &[Sphere],
     planes: &[Plane],
@@ -153,6 +159,7 @@ pub fn render(
     height: usize,
 ) -> Vec<Vec<Color>> {
     let shared_camera = Arc::new(*camera);
+    let shared_ambiant_light = Arc::new(*ambiant_light);
     let shared_lights = Arc::new(omni_lights.to_vec());
     let shared_spheres = Arc::new(spheres.to_vec());
     let shared_planes = Arc::new(planes.to_vec());
@@ -168,6 +175,7 @@ pub fn render(
     let rows_per_thread = height.div_ceil(max_threads);
     for thread_id in 0..max_threads {
         let camera = Arc::clone(&shared_camera);
+        let ambiant_light = Arc::clone(&shared_ambiant_light);
         let lights = Arc::clone(&shared_lights);
         let spheres = Arc::clone(&shared_spheres);
         let planes = Arc::clone(&shared_planes);
@@ -182,7 +190,7 @@ pub fn render(
                 for (x, pixel) in row.iter_mut().enumerate() {
                     let ray =
                         generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
-                    *pixel = trace_ray(&ray, &lights, &spheres, &planes, 0);
+                    *pixel = trace_ray(&ray, &ambiant_light, &lights, &spheres, &planes, 0);
                 }
                 let mut img = image.lock().unwrap();
                 img[y] = row;

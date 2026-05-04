@@ -3,6 +3,14 @@
 version = 4
 
 [[package]]
+name = "ambiant"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "vec3",
+]
+
+[[package]]
 name = "camera"
 version = "0.1.0"
 dependencies = [
@@ -82,6 +90,7 @@ dependencies = [
 name = "raytracer"
 version = "0.1.0"
 dependencies = [
+ "ambiant",
  "camera",
  "color",
  "config",
