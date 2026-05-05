@@ -10,5 +10,6 @@ path = "src/lib.rs"
 [dependencies]
 sphere = { path = "../sphere" }
 plane = { path = "../plane" }
+cylinder = { path = "../cylinder" }
 ray = { path = "../../ray" }
 color = { path = "../../color" }

@@ -14,3 +14,4 @@ light_interface = { path = "crates/lights/light_interface" }
 omni_light = { path = "crates/lights/omni_light" }
 plane = { path = "crates/objects/plane" }
 sphere = { path = "crates/objects/sphere" }
+cylinder = { path = "crates/objects/cylinder" }

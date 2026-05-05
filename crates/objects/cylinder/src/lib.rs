@@ -3,14 +3,16 @@ use std::fmt;
 
 use ray::{Ray, HitRecord};
 use vec3::Vec3;
+use color::Color;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cylinder {
     pub center: Vec3,
     pub radius: f64,
+    pub color: Color,
 }
 
-impl fmt::Display for Sphere {
+impl fmt::Display for Cylinder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Cylinder")?;
         writeln!(f, "  center: {}", self.center)?;
@@ -21,10 +23,10 @@ impl fmt::Display for Sphere {
 impl Cylinder {
     #[inline(always)]
     pub fn intersect(&self, ray: &Ray, epsilon: f64) -> Option<HitRecord> {
-        let vector = center + self.radius * Vec3::X;
-        let a = 1 - ((vector * Ray.vector) * (vector * Ray.vector));
-        let half_b = 2 * ((Ray.vector * (Ray.point - self.center)) - ((Ray.vector * vector) * ((Ray.point - self.center) * vector)));
-        let c = ((Ray.point - self.center) * (Ray.point - self.center) - (((Ray.point - self.center) * vector) * ((Ray.point - self.center) * vector)) - self.radius * self.radius);
+        let vector = self.center + (Vec3{x : self.radius, y : 0.0, z : 0.0});
+        let a = 1.0 - (vector.dot(&ray.direction) * vector.dot(&ray.direction));
+        let half_b = 2.0 * ((ray.direction.dot(&(ray.origin - self.center))) - (ray.direction.dot(&vector) * (ray.origin - self.center).dot(&vector)));
+        let c = (ray.origin - self.center).dot(&(ray.origin - self.center)) - ((ray.origin - self.center).dot(&vector) * ((ray.origin - self.center).dot(&vector))) - self.radius * self.radius;
         let discriminant = half_b * half_b - a * c;
         if discriminant < 0.0 {
             return None;
