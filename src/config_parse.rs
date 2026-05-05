@@ -85,11 +85,11 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         }
     }
 
-    return Ok(SceneConfig {
-        camera: camera,
-        lights: lights,
-        objects: objects,
-        width: width,
-        height: height,
-    });
+    Ok(SceneConfig {
+        camera,
+        lights,
+        objects,
+        width,
+        height,
+    })
 }
