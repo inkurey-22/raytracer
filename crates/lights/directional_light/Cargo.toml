@@ -6,3 +6,5 @@ edition = "2021"
 [dependencies]
 color = { path = "../../color" }
 vec3 = { path = "../../vec3" }
+ray = { path = "../../ray" }
+object_interface = { path = "../../objects/object_interface" }

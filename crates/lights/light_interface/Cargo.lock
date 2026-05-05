@@ -7,6 +7,17 @@ name = "color"
 version = "0.1.0"
 
 [[package]]
+name = "light_interface"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "object_interface",
+ "omni_light",
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "object_interface"
 version = "0.1.0"
 dependencies = [

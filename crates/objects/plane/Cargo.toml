@@ -5,4 +5,5 @@ edition = "2021"
 
 [dependencies]
 vec3 = { path = "../../vec3" }
+color = { path = "../../color" }
 ray = { path = "../../ray" }

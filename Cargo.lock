@@ -30,6 +30,20 @@ name = "directional_light"
 version = "0.1.0"
 dependencies = [
  "color",
+ "object_interface",
+ "ray",
+ "vec3",
+]
+
+[[package]]
+name = "light_interface"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "directional_light",
+ "object_interface",
+ "omni_light",
+ "ray",
  "vec3",
 ]
 
@@ -40,10 +54,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
+name = "object_interface"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "plane",
+ "ray",
+ "sphere",
+]
+
+[[package]]
 name = "omni_light"
 version = "0.1.0"
 dependencies = [
  "color",
+ "object_interface",
+ "ray",
  "vec3",
 ]
 
@@ -57,6 +83,7 @@ checksum = "df94ce210e5bc13cb6651479fa48d14f601d9858cfe0467f43ae157023b938d3"
 name = "plane"
 version = "0.1.0"
 dependencies = [
+ "color",
  "ray",
  "vec3",
 ]
@@ -94,6 +121,8 @@ dependencies = [
  "color",
  "config",
  "directional_light",
+ "light_interface",
+ "object_interface",
  "omni_light",
  "plane",
  "ray",
@@ -134,6 +163,7 @@ dependencies = [
 name = "sphere"
 version = "0.1.0"
 dependencies = [
+ "color",
  "ray",
  "vec3",
 ]
@@ -192,9 +222,9 @@ version = "0.1.0"
 
 [[package]]
 name = "winnow"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "09dac053f1cd375980747450bfc7250c264eaae0583872e845c0c7cd578872b5"
+checksum = "2ee1708bef14716a11bae175f579062d4554d95be2c6829f518df847b7b3fdd0"
 dependencies = [
  "memchr",
 ]
