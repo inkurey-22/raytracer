@@ -17,16 +17,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "omni_light"
-version = "0.1.0"
-dependencies = [
- "color",
- "object_interface",
- "ray",
- "vec3",
-]
-
-[[package]]
 name = "plane"
 version = "0.1.0"
 dependencies = [

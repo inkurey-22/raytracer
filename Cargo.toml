@@ -9,6 +9,8 @@ vec3 = { path = "crates/vec3" }
 ray = { path = "crates/ray" }
 color = { path = "crates/color" }
 camera = { path = "crates/camera" }
+object_interface = { path = "crates/objects/object_interface" }
+light_interface = { path = "crates/lights/light_interface" }
 omni_light = { path = "crates/lights/omni_light" }
 plane = { path = "crates/objects/plane" }
 sphere = { path = "crates/objects/sphere" }

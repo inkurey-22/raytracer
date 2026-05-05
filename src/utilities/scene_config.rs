@@ -1,12 +1,12 @@
 use std::fmt;
 
-use super::{Camera, light, object};
+use crate::utilities::Camera;
 
 #[derive(Debug, Clone)]
 pub struct SceneConfig {
     pub camera: Camera,
-    pub lights: Vec<light::Light>,
-    pub objects: Vec<object::Object>,
+    pub lights: Vec<light_interface::ILight>,
+    pub objects: Vec<object_interface::IObject>,
     pub width: usize,
     pub height: usize,
 }

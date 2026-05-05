@@ -1,7 +1,4 @@
-use crate::utilities::{
-    light,
-    value_reading::{get_color, get_f64, get_vec3},
-};
+use crate::utilities::value_reading::{get_color, get_f64, get_vec3};
 use color::Color;
 use vec3::Vec3;
 
@@ -44,9 +41,9 @@ impl LightBuilder {
         Ok(())
     }
 
-    pub fn build(&self, object_type: &str) -> Result<light::Light, config::ConfigError> {
+    pub fn build(&self, object_type: &str) -> Result<light_interface::ILight, config::ConfigError> {
         match object_type {
-            "omni" => Ok(light::Light::OmniLight(omni_light::OmniLight {
+            "omni" => Ok(light_interface::ILight::OmniLight(omni_light::OmniLight {
                 color: self.color,
                 position: self.position,
                 intensity: self.intensity,

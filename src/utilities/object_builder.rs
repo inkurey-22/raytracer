@@ -1,7 +1,4 @@
-use crate::utilities::{
-    object,
-    value_reading::{get_color, get_f64, get_vec3},
-};
+use crate::utilities::value_reading::{get_color, get_f64, get_vec3};
 use color::Color;
 use vec3::Vec3;
 
@@ -50,14 +47,17 @@ impl ObjectBuilder {
         Ok(())
     }
 
-    pub fn build(&self, object_type: &str) -> Result<object::Object, config::ConfigError> {
+    pub fn build(
+        &self,
+        object_type: &str,
+    ) -> Result<object_interface::IObject, config::ConfigError> {
         match object_type {
-            "sphere" => Ok(object::Object::Sphere(sphere::Sphere {
+            "sphere" => Ok(object_interface::IObject::Sphere(sphere::Sphere {
                 color: self.color,
                 center: self.position,
                 radius: self.radius,
             })),
-            "plane" => Ok(object::Object::Plane(plane::Plane {
+            "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
                 point: self.position,
                 normal: self.normal,
