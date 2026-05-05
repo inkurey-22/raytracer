@@ -34,6 +34,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "cylinder"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "directional_light"
 version = "0.1.0"
 dependencies = [
@@ -67,6 +76,7 @@ name = "object_interface"
 version = "0.1.0"
 dependencies = [
  "color",
+ "cylinder",
  "plane",
  "ray",
  "sphere",
@@ -130,6 +140,7 @@ dependencies = [
  "camera",
  "color",
  "config",
+ "cylinder",
  "directional_light",
  "light_interface",
  "object_interface",

@@ -16,38 +16,9 @@ dependencies = [
 ]
 
 [[package]]
-name = "object_interface"
-version = "0.1.0"
-dependencies = [
- "color",
- "cylinder",
- "plane",
- "ray",
- "sphere",
-]
-
-[[package]]
-name = "plane"
-version = "0.1.0"
-dependencies = [
- "color",
- "ray",
- "vec3",
-]
-
-[[package]]
 name = "ray"
 version = "0.1.0"
 dependencies = [
- "vec3",
-]
-
-[[package]]
-name = "sphere"
-version = "0.1.0"
-dependencies = [
- "color",
- "ray",
  "vec3",
 ]
 

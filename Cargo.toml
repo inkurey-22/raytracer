@@ -16,3 +16,4 @@ ambiant = { path = "crates/lights/ambiant" }
 directional_light = { path = "crates/lights/directional_light" }
 plane = { path = "crates/objects/plane" }
 sphere = { path = "crates/objects/sphere" }
+cylinder = { path = "crates/objects/cylinder" }
