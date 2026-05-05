@@ -16,6 +16,7 @@ impl fmt::Display for SceneConfig {
         writeln!(f, "Scene")?;
         writeln!(f, "  width: {}, height: {}", self.width, self.height)?;
         writeln!(f, "{}", self.camera)?;
+
         if self.lights.is_empty() {
             writeln!(f, "  Lights: none")?;
         } else {
@@ -24,6 +25,7 @@ impl fmt::Display for SceneConfig {
                 write!(f, "    #{} {}", index + 1, light)?;
             }
         }
+
         if self.objects.is_empty() {
             writeln!(f, "  Objects: none")?;
         } else {
@@ -32,6 +34,7 @@ impl fmt::Display for SceneConfig {
                 write!(f, "    #{} {}", index + 1, object)?;
             }
         }
+
         Ok(())
     }
 }
