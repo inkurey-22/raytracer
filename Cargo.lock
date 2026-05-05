@@ -26,18 +26,20 @@ dependencies = [
 ]
 
 [[package]]
-<<<<<<< feat/cylinder
 name = "cylinder"
 version = "0.1.0"
 dependencies = [
  "color",
-=======
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "directional_light"
 version = "0.1.0"
 dependencies = [
  "color",
  "object_interface",
->>>>>>> main
  "ray",
  "vec3",
 ]
@@ -128,11 +130,8 @@ dependencies = [
  "camera",
  "color",
  "config",
-<<<<<<< feat/cylinder
  "cylinder",
-=======
  "directional_light",
->>>>>>> main
  "light_interface",
  "object_interface",
  "omni_light",
