@@ -1,21 +1,14 @@
-
 use std::fmt;
 
-use ray::{Ray, HitRecord};
+use color::Color;
+use ray::{HitRecord, Ray};
 use vec3::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Sphere {
+    pub color: Color,
     pub center: Vec3,
     pub radius: f64,
-}
-
-impl fmt::Display for Sphere {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Sphere")?;
-        writeln!(f, "  center: {}", self.center)?;
-        write!(f, "  radius: {:.3}", self.radius)
-    }
 }
 
 impl Sphere {
@@ -43,5 +36,14 @@ impl Sphere {
         let point = ray.at(t);
         let normal = (point - self.center).normalize();
         Some(HitRecord { point, normal, t })
+    }
+}
+
+impl fmt::Display for Sphere {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "Sphere")?;
+        writeln!(f, "      center: {}", self.center)?;
+        writeln!(f, "      radius: {:.3}", self.radius)?;
+        writeln!(f, "      color: {}", self.color)
     }
 }

@@ -1,22 +1,17 @@
 use std::fmt;
 
-use ray::{Ray, HitRecord};
+use color::Color;
+use ray::{HitRecord, Ray};
 use vec3::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Plane {
+    pub color: Color,
     pub point: Vec3,
     pub normal: Vec3,
 }
 
 impl Plane {
-    pub fn new(point: Vec3, normal: Vec3) -> Self {
-        Plane {
-            point,
-            normal: normal.normalize(),
-        }
-    }
-
     #[inline(always)]
     pub fn intersect(&self, ray: &Ray, epsilon: f64) -> Option<HitRecord> {
         let denom = self.normal.dot(&ray.direction);
@@ -37,7 +32,8 @@ impl Plane {
 impl fmt::Display for Plane {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Plane")?;
-        writeln!(f, "  point: {}", self.point)?;
-        write!(f, "  normal: {}", self.normal)
+        writeln!(f, "      point: {}", self.point)?;
+        writeln!(f, "      normal: {}", self.normal)?;
+        writeln!(f, "      color: {}", self.color)
     }
 }

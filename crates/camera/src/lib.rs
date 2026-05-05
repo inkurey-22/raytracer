@@ -29,9 +29,9 @@ impl Default for Camera {
 
 impl fmt::Display for Camera {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Camera")?;
-        writeln!(f, "  fov: {:.3}", self.fov)?;
-        writeln!(f, "  position: {}", self.position)?;
-        write!(f, "  direction: {}", self.direction)
+        writeln!(f, "  Camera:")?;
+        writeln!(f, "    fov: {:.3}", self.fov)?;
+        writeln!(f, "    position: {}", self.position)?;
+        write!(f, "    direction: {}", self.direction)
     }
 }
