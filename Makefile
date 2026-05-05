@@ -5,9 +5,12 @@ NAME = raytracer
 CRATE_DIRS = crates/vec3 \
 			 crates/color \
 			 crates/camera \
+			 crates/objects/object_interface \
 			 crates/objects/sphere \
 			 crates/objects/plane \
+			 crates/lights/light_interface \
 			 crates/lights/omni_light \
+			 crates/lights/directional_light \
 
 all:
 	cargo build --release

@@ -2,60 +2,36 @@ use std::f64;
 use std::sync::{Arc, Mutex};
 use std::thread;
 
-use ambiant::AmbiantLight;
 use color::Color;
 use vec3::Vec3;
 
 use camera::Camera;
-use omni_light::OmniLight;
-use plane::Plane;
 use ray::{EPSILON, Ray};
-use sphere::Sphere;
 
 const MAX_RECURSION: i32 = 22;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct HitInfo {
-    pub t: f64,
+    pub _depth: f64,
     pub point: Vec3,
     pub normal: Vec3,
-    pub object_type: ObjectType,
+    pub object: object_interface::IObject,
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum ObjectType {
-    Sphere,
-    Plane,
-}
-
-pub fn find_closest_hit(ray: &Ray, spheres: &[Sphere], planes: &[Plane]) -> Option<HitInfo> {
+pub fn find_closest_hit(ray: &Ray, objects: &[object_interface::IObject]) -> Option<HitInfo> {
     let mut closest_t = f64::INFINITY;
     let mut hit_info: Option<HitInfo> = None;
 
-    for sphere in spheres {
-        if let Some(hit) = sphere.intersect(ray, EPSILON)
+    for object in objects {
+        if let Some(hit) = object.intersect(ray, EPSILON)
             && hit.t < closest_t
         {
             closest_t = hit.t;
             hit_info = Some(HitInfo {
-                t: hit.t,
+                _depth: hit.t,
                 point: hit.point,
                 normal: hit.normal,
-                object_type: ObjectType::Sphere,
-            });
-        }
-    }
-
-    for plane in planes {
-        if let Some(hit) = plane.intersect(ray, EPSILON)
-            && hit.t < closest_t
-        {
-            closest_t = hit.t;
-            hit_info = Some(HitInfo {
-                t: hit.t,
-                point: hit.point,
-                normal: hit.normal,
-                object_type: ObjectType::Plane,
+                object: object.clone(),
             });
         }
     }
@@ -66,59 +42,31 @@ pub fn find_closest_hit(ray: &Ray, spheres: &[Sphere], planes: &[Plane]) -> Opti
 pub fn compute_lighting(
     hit_point: Vec3,
     normal: Vec3,
-    omni_lights: &[OmniLight],
-    spheres: &[Sphere],
-    planes: &[Plane],
+    hit_object: object_interface::IObject,
+    lights: &[light_interface::ILight],
+    objects: &[object_interface::IObject],
 ) -> Color {
-    let mut color = Color::new(0.0, 0.0, 0.0);
+    let mut lighting = Color::new(0.0, 0.0, 0.0);
 
-    for light in omni_lights {
-        let light_dir = (light.position - hit_point).normalize();
-        let distance = (light.position - hit_point).length();
-
-        let shadow_ray: Ray = Ray::new(hit_point + normal * EPSILON, light_dir);
-        let in_shadow =
-            find_closest_hit(&shadow_ray, spheres, planes).is_some_and(|hit| hit.t < distance);
-
-        if in_shadow {
-            continue;
-        }
-
-        let diffuse_intensity = normal.dot(&light_dir).max(0.0);
-        let diffuse = light.color * (light.intensity / (distance * distance)) * diffuse_intensity;
-
-        color += diffuse;
+    for light in lights {
+        lighting += light.compute_contribution(hit_point, normal, objects);
     }
 
-    color
+    (lighting * hit_object.get_color()).normalize_max()
 }
 
 pub fn trace_ray(
     ray: &Ray,
-    ambiant_light: &AmbiantLight,
-    omni_lights: &[OmniLight],
-    spheres: &[Sphere],
-    planes: &[Plane],
+    lights: &[light_interface::ILight],
+    objects: &[object_interface::IObject],
     depth: i32,
 ) -> Color {
     if depth > MAX_RECURSION {
         return Color::new(0.0, 0.0, 0.0);
     }
 
-    match find_closest_hit(ray, spheres, planes) {
-        Some(hit) => {
-            let diffuse_lighting =
-                compute_lighting(hit.point, hit.normal, omni_lights, spheres, planes);
-
-            let object_color = match hit.object_type {
-                ObjectType::Sphere => Color::new(0.9, 0.9, 0.9),
-                ObjectType::Plane => Color::new(1.0, 1.0, 1.0),
-            };
-
-            let ambient_light_value = ambiant_light.color * ambiant_light.intensity;
-            let total_lighting = ambient_light_value + diffuse_lighting;
-            (object_color * total_lighting.normalize_max()).saturate()
-        }
+    match find_closest_hit(ray, objects) {
+        Some(hit) => compute_lighting(hit.point, hit.normal, hit.object, lights, objects).normalize_max(),
         None => {
             let t = 0.5 * (ray.direction.x + 1.0);
             Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
@@ -151,18 +99,14 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
 
 pub fn render(
     camera: &Camera,
-    ambiant_light: &AmbiantLight,
-    omni_lights: &[OmniLight],
-    spheres: &[Sphere],
-    planes: &[Plane],
     width: usize,
     height: usize,
+    lights: &[light_interface::ILight],
+    objects: &[object_interface::IObject],
 ) -> Vec<Vec<Color>> {
     let shared_camera = Arc::new(*camera);
-    let shared_ambiant_light = Arc::new(*ambiant_light);
-    let shared_lights = Arc::new(omni_lights.to_vec());
-    let shared_spheres = Arc::new(spheres.to_vec());
-    let shared_planes = Arc::new(planes.to_vec());
+    let shared_lights = Arc::new(lights.to_vec());
+    let shared_objects = Arc::new(objects.to_vec());
 
     let image = Arc::new(Mutex::new(vec![vec![Color::default(); width]; height]));
 
@@ -175,10 +119,8 @@ pub fn render(
     let rows_per_thread = height.div_ceil(max_threads);
     for thread_id in 0..max_threads {
         let camera = Arc::clone(&shared_camera);
-        let ambiant_light = Arc::clone(&shared_ambiant_light);
         let lights = Arc::clone(&shared_lights);
-        let spheres = Arc::clone(&shared_spheres);
-        let planes = Arc::clone(&shared_planes);
+        let objects = Arc::clone(&shared_objects);
         let image = Arc::clone(&image);
 
         let start_row = thread_id * rows_per_thread;
@@ -188,9 +130,8 @@ pub fn render(
             for y in start_row..end_row {
                 let mut row = vec![Color::default(); width];
                 for (x, pixel) in row.iter_mut().enumerate() {
-                    let ray =
-                        generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
-                    *pixel = trace_ray(&ray, &ambiant_light, &lights, &spheres, &planes, 0);
+                    let ray = generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
+                    *pixel = trace_ray(&ray, &lights, &objects, 0);
                 }
                 let mut img = image.lock().unwrap();
                 img[y] = row;
@@ -220,9 +161,10 @@ pub fn write_ppm(filename: &str, image: &[Vec<Color>]) -> std::io::Result<()> {
 
     for row in image {
         for pixel in row {
-            let r = (pixel.r * 255.0) as u8;
-            let g = (pixel.g * 255.0) as u8;
-            let b = (pixel.b * 255.0) as u8;
+            let clamped = pixel.saturate();
+            let r = (clamped.r * 255.0) as u8;
+            let g = (clamped.g * 255.0) as u8;
+            let b = (clamped.b * 255.0) as u8;
             buffer.push_str(&format!("{} {} {} ", r, g, b));
         }
         buffer.push('\n');

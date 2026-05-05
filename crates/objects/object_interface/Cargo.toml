@@ -1,0 +1,14 @@
+[package]
+name = "object_interface"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "object_interface"
+path = "src/lib.rs"
+
+[dependencies]
+sphere = { path = "../sphere" }
+plane = { path = "../plane" }
+ray = { path = "../../ray" }
+color = { path = "../../color" }

@@ -26,15 +26,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let height = args.height.unwrap_or(scene.height);
 
     println!("Rendering {}x{}...", width, height);
-    let image = render(
-        &scene.camera,
-        &scene.ambiant_light,
-        &scene.omni_lights,
-        &scene.spheres,
-        &scene.planes,
-        width,
-        height,
-    );
+    let image = render(&scene.camera, width, height, &scene.lights, &scene.objects);
 
     println!("Writing to {}...", output_path);
     write_ppm(&output_path, &image)?;

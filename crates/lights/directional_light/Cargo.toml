@@ -1,14 +1,10 @@
 [package]
-name = "omni_light"
+name = "directional_light"
 version = "0.1.0"
-edition = "2024"
-
-[lib]
-name = "omni_light"
-path = "src/lib.rs"
+edition = "2021"
 
 [dependencies]
-vec3 = { path = "../../vec3" }
 color = { path = "../../color" }
+vec3 = { path = "../../vec3" }
 ray = { path = "../../ray" }
 object_interface = { path = "../../objects/object_interface" }
