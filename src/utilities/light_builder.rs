@@ -5,6 +5,7 @@ use vec3::Vec3;
 pub struct LightBuilder {
     color: Color,
     position: Vec3,
+    direction: Vec3,
     intensity: f64,
 }
 
@@ -13,6 +14,7 @@ impl LightBuilder {
         Self {
             color: Color::new(1.0, 1.0, 1.0),
             position: Vec3::new(0.0, 0.0, 0.0),
+            direction: Vec3::new(0.0, -1.0, 0.0),
             intensity: 1.0,
         }
     }
@@ -29,6 +31,9 @@ impl LightBuilder {
             "position" => {
                 self.position = get_vec3(value)?;
             }
+            "direction" => {
+                self.direction = get_vec3(value)?;
+            }
             "intensity" => {
                 self.intensity = get_f64(value)?;
             }
@@ -41,15 +46,22 @@ impl LightBuilder {
         Ok(())
     }
 
-    pub fn build(&self, object_type: &str) -> Result<light_interface::ILight, config::ConfigError> {
-        match object_type {
+    pub fn build(&self, light_type: &str) -> Result<light_interface::ILight, config::ConfigError> {
+        match light_type {
             "omni" => Ok(light_interface::ILight::OmniLight(omni_light::OmniLight {
                 color: self.color,
                 position: self.position,
                 intensity: self.intensity,
             })),
+            "directional" => Ok(light_interface::ILight::DirectionalLight(
+                directional_light::DirectionalLight {
+                    color: self.color,
+                    direction: self.direction.normalize(),
+                    intensity: self.intensity,
+                },
+            )),
             other => Err(config::ConfigError::Message(format!(
-                "Unknown object type: {other}"
+                "Unknown light type: {other}"
             ))),
         }
     }

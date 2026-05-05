@@ -12,6 +12,7 @@ camera = { path = "crates/camera" }
 object_interface = { path = "crates/objects/object_interface" }
 light_interface = { path = "crates/lights/light_interface" }
 omni_light = { path = "crates/lights/omni_light" }
+directional_light = { path = "crates/lights/directional_light" }
 plane = { path = "crates/objects/plane" }
 sphere = { path = "crates/objects/sphere" }
 cylinder = { path = "crates/objects/cylinder" }

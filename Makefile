@@ -10,6 +10,7 @@ CRATE_DIRS = crates/vec3 \
 			 crates/objects/plane \
 			 crates/lights/light_interface \
 			 crates/lights/omni_light \
+			 crates/lights/directional_light \
 
 all:
 	cargo build --release
