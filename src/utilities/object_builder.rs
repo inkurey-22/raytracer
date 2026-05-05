@@ -12,7 +12,7 @@ pub struct ObjectBuilder {
 impl ObjectBuilder {
     pub fn new() -> Self {
         Self {
-            color: Color::new(255.0, 255.0, 255.0),
+            color: Color::new(1.0, 1.0, 1.0),
             position: Vec3::new(0.0, 0.0, 0.0),
             normal: Vec3::new(0.0, 0.0, 0.0),
             radius: 1.0,

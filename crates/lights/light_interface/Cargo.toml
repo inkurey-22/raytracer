@@ -14,3 +14,4 @@ ray = { path = "../../ray" }
 object_interface = { path = "../../objects/object_interface" }
 omni_light = { path = "../omni_light" }
 directional_light = { path = "../directional_light" }
+ambiant = { path = "../ambiant" }

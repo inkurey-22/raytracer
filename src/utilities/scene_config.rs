@@ -26,6 +26,19 @@ impl fmt::Display for SceneConfig {
             }
         }
 
+        writeln!(f)?;
+        if let Some(light_interface::ILight::AmbiantLight(ambiant_light)) = self
+            .lights
+            .iter()
+            .find(|light| matches!(light, light_interface::ILight::AmbiantLight(_)))
+        {
+            writeln!(f, "  Ambiant Light:")?;
+            writeln!(f, "    color: {}", ambiant_light.color)?;
+            writeln!(f, "    intensity: {:.3}", ambiant_light.intensity)?;
+        } else {
+            writeln!(f, "  Ambiant Light: none")?;
+        }
+
         if self.objects.is_empty() {
             writeln!(f, "  Objects: none")?;
         } else {

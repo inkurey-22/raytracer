@@ -161,9 +161,10 @@ pub fn write_ppm(filename: &str, image: &[Vec<Color>]) -> std::io::Result<()> {
 
     for row in image {
         for pixel in row {
-            let r = (pixel.r * 255.0) as u8;
-            let g = (pixel.g * 255.0) as u8;
-            let b = (pixel.b * 255.0) as u8;
+            let clamped = pixel.saturate();
+            let r = (clamped.r * 255.0) as u8;
+            let g = (clamped.g * 255.0) as u8;
+            let b = (clamped.b * 255.0) as u8;
             buffer.push_str(&format!("{} {} {} ", r, g, b));
         }
         buffer.push('\n');

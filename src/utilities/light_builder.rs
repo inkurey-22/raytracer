@@ -53,6 +53,10 @@ impl LightBuilder {
                 position: self.position,
                 intensity: self.intensity,
             })),
+            "ambiant" => Ok(light_interface::ILight::AmbiantLight(ambiant::AmbiantLight {
+                color: self.color,
+                intensity: self.intensity,
+            })),
             "directional" => Ok(light_interface::ILight::DirectionalLight(
                 directional_light::DirectionalLight {
                     color: self.color,

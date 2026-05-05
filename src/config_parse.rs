@@ -83,6 +83,17 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         }
     }
 
+    let ambiant_count = lights
+        .iter()
+        .filter(|light| matches!(light, light_interface::ILight::AmbiantLight(_)))
+        .count();
+
+    if ambiant_count > 1 {
+        return Err(config::ConfigError::Message(
+            "Only one ambient light is allowed.".to_string(),
+        ));
+    }
+
     Ok(SceneConfig {
         camera,
         lights,
