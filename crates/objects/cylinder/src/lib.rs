@@ -10,6 +10,7 @@ pub struct Cylinder {
     pub center: Vec3,
     pub radius: f64,
     pub color: Color,
+    pub normal: Vec3,
 }
 
 impl fmt::Display for Cylinder {
@@ -23,18 +24,22 @@ impl fmt::Display for Cylinder {
 impl Cylinder {
     #[inline(always)]
     pub fn intersect(&self, ray: &Ray, epsilon: f64) -> Option<HitRecord> {
-        let vector = self.center + (Vec3{x : self.radius, y : 0.0, z : 0.0});
-        let a = 1.0 - (vector.dot(&ray.direction) * vector.dot(&ray.direction));
-        let half_b = 2.0 * ((ray.direction.dot(&(ray.origin - self.center))) - (ray.direction.dot(&vector) * (ray.origin - self.center).dot(&vector)));
-        let c = (ray.origin - self.center).dot(&(ray.origin - self.center)) - ((ray.origin - self.center).dot(&vector) * ((ray.origin - self.center).dot(&vector))) - self.radius * self.radius;
-        let discriminant = half_b * half_b - a * c;
+        let axis = self.normal.normalize();
+        let oc = ray.origin - self.center;
+        let d = ray.direction;
+        
+        let a = d.dot(&d) - (d.dot(&axis) * d.dot(&axis));
+        let b = 2.0 * (oc.dot(&d) - (oc.dot(&axis) * d.dot(&axis)));
+        let c = oc.dot(&oc) - (oc.dot(&axis) * oc.dot(&axis)) - self.radius * self.radius;
+        
+        let discriminant = b * b - 4.0 * a * c;
         if discriminant < 0.0 {
             return None;
         }
+        
         let sqrt_d = discriminant.sqrt();
-        let denom = a;
-        let t1 = (-half_b - sqrt_d) / denom;
-        let t2 = (-half_b + sqrt_d) / denom;
+        let t1 = (-b - sqrt_d) / (2.0 * a);
+        let t2 = (-b + sqrt_d) / (2.0 * a);
         let t = if t1 > epsilon {
             t1
         } else if t2 > epsilon {
@@ -42,8 +47,10 @@ impl Cylinder {
         } else {
             return None;
         };
+        
         let point = ray.at(t);
-        let normal = (point - self.center).normalize();
+        let oc_hit = point - self.center;
+        let normal = (oc_hit - (axis * oc_hit.dot(&axis))).normalize();
         Some(HitRecord { point, normal, t })
     }
 }

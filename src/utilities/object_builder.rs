@@ -61,6 +61,7 @@ impl ObjectBuilder {
                 color: self.color,
                 center: self.position,
                 radius: self.radius,
+                normal: self.normal,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
