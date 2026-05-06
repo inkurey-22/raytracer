@@ -45,11 +45,7 @@ pub fn get_vec3(value: config::Value) -> Result<Vec3, config::ConfigError> {
 
 pub fn get_color(value: config::Value) -> Result<Color, config::ConfigError> {
     fn to_channel(value: f64) -> f64 {
-        if value > 1.0 {
-            value / 255.0
-        } else {
-            value
-        }
+        if value > 1.0 { value / 255.0 } else { value }
     }
 
     let table = value
@@ -59,27 +55,27 @@ pub fn get_color(value: config::Value) -> Result<Color, config::ConfigError> {
     Ok(Color {
         r: to_channel(
             table
-            .get("r")
-            .cloned()
-            .ok_or_else(|| config::ConfigError::Message("Missing Color.r".to_string()))?
-            .into_float()
-            .map_err(|_| config::ConfigError::Message("Invalid Color.r".to_string()))?,
+                .get("r")
+                .cloned()
+                .ok_or_else(|| config::ConfigError::Message("Missing Color.r".to_string()))?
+                .into_float()
+                .map_err(|_| config::ConfigError::Message("Invalid Color.r".to_string()))?,
         ),
         g: to_channel(
             table
-            .get("g")
-            .cloned()
-            .ok_or_else(|| config::ConfigError::Message("Missing Color.g".to_string()))?
-            .into_float()
-            .map_err(|_| config::ConfigError::Message("Invalid Color.g".to_string()))?,
+                .get("g")
+                .cloned()
+                .ok_or_else(|| config::ConfigError::Message("Missing Color.g".to_string()))?
+                .into_float()
+                .map_err(|_| config::ConfigError::Message("Invalid Color.g".to_string()))?,
         ),
         b: to_channel(
             table
-            .get("b")
-            .cloned()
-            .ok_or_else(|| config::ConfigError::Message("Missing Color.b".to_string()))?
-            .into_float()
-            .map_err(|_| config::ConfigError::Message("Invalid Color.b".to_string()))?,
+                .get("b")
+                .cloned()
+                .ok_or_else(|| config::ConfigError::Message("Missing Color.b".to_string()))?
+                .into_float()
+                .map_err(|_| config::ConfigError::Message("Invalid Color.b".to_string()))?,
         ),
     })
 }
