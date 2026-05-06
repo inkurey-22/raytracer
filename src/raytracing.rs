@@ -66,7 +66,9 @@ pub fn trace_ray(
     }
 
     match find_closest_hit(ray, objects) {
-        Some(hit) => compute_lighting(hit.point, hit.normal, hit.object, lights, objects).normalize_max(),
+        Some(hit) => {
+            compute_lighting(hit.point, hit.normal, hit.object, lights, objects).normalize_max()
+        }
         None => {
             let t = 0.5 * (ray.direction.x + 1.0);
             Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
@@ -130,7 +132,8 @@ pub fn render(
             for y in start_row..end_row {
                 let mut row = vec![Color::default(); width];
                 for (x, pixel) in row.iter_mut().enumerate() {
-                    let ray = generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
+                    let ray =
+                        generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
                     *pixel = trace_ray(&ray, &lights, &objects, 0);
                 }
                 let mut img = image.lock().unwrap();

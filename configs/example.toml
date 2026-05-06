@@ -37,4 +37,4 @@ color = { r = 0, g = 0, b = 255 }
 apex = { x = -2.0, y = 5.0, z = 10.0}
 color = { r = 0, g = 255, b = 255 }
 normal = { x = 0.0, y = -1.0, z = 0.0 }
-half_angle = 0.5
+angle = 0.5

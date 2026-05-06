@@ -8,7 +8,7 @@ use color::Color;
 #[derive(Debug, Clone, Copy)]
 pub struct Cone {
     pub apex: Vec3,
-    pub half_angle: f64,
+    pub angle: f64,
     pub color: Color,
     pub normal: Vec3,
 }
@@ -17,14 +17,14 @@ impl fmt::Display for Cone {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Cone")?;
         writeln!(f, "  apex: {}", self.apex)?;
-        write!(f, "  half_angle: {:.3}", self.half_angle)
+        write!(f, "  angle: {:.3}", self.angle)
     }
 }
 
 impl Cone {
     #[inline(always)]
     pub fn intersect(&self, ray: &Ray, epsilon: f64) -> Option<HitRecord> {
-        let cos_theta = self.half_angle.cos();
+        let cos_theta = self.angle.cos();
         let cos_theta_sq = cos_theta * cos_theta;
 
         let s = ray.origin - self.apex;
@@ -59,7 +59,7 @@ impl Cone {
             return None;
         }
         let v = point - self.apex;
-        let cos_theta = self.half_angle.cos();
+        let cos_theta = self.angle.cos();
         let cos_theta_sq = cos_theta * cos_theta;
 
         let v_dot_n = v.dot(&self.normal);
