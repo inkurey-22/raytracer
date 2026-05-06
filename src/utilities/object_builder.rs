@@ -7,6 +7,8 @@ pub struct ObjectBuilder {
     position: Vec3,
     normal: Vec3,
     radius: f64,
+    half_angle: f64,
+    apex: Vec3,
 }
 
 impl ObjectBuilder {
@@ -16,6 +18,8 @@ impl ObjectBuilder {
             position: Vec3::new(0.0, 0.0, 0.0),
             normal: Vec3::new(0.0, 0.0, 0.0),
             radius: 1.0,
+            half_angle: 0.0,
+            apex: Vec3::new(0.0, 0.0, 0.0),
         }
     }
 
@@ -36,6 +40,12 @@ impl ObjectBuilder {
             }
             "radius" => {
                 self.radius = get_f64(value)?;
+            }
+            "half_angle" => {
+                self.half_angle = get_f64(value)?;
+            }
+            "apex" => {
+                self.apex = get_vec3(value)?;
             }
 
             _ => {
@@ -61,6 +71,12 @@ impl ObjectBuilder {
                 color: self.color,
                 center: self.position,
                 radius: self.radius,
+                normal: self.normal,
+            })),
+            "cone" => Ok(object_interface::IObject::Cone(cone::Cone {
+                color: self.color,
+                apex: self.apex,
+                half_angle: self.half_angle,
                 normal: self.normal,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
