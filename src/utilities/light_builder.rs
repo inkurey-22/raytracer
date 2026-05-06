@@ -1,11 +1,12 @@
-use crate::utilities::value_reading::{get_color, get_f64, get_vec3};
+use crate::utilities::value_reading::{get_color, get_f64, get_orientation, get_vec3};
 use color::Color;
+use orientation::{Orientation, Vec3OrientationExt};
 use vec3::Vec3;
 
 pub struct LightBuilder {
     color: Color,
     position: Vec3,
-    direction: Vec3,
+    orientation: Orientation,
     intensity: f64,
 }
 
@@ -14,7 +15,7 @@ impl LightBuilder {
         Self {
             color: Color::new(1.0, 1.0, 1.0),
             position: Vec3::new(0.0, 0.0, 0.0),
-            direction: Vec3::new(0.0, -1.0, 0.0),
+            orientation: Orientation::new(-90.0, 0.0, 0.0),
             intensity: 1.0,
         }
     }
@@ -31,12 +32,16 @@ impl LightBuilder {
             "position" => {
                 self.position = get_vec3(value)?;
             }
-            "direction" => {
-                self.direction = get_vec3(value)?;
-            }
             "intensity" => {
                 self.intensity = get_f64(value)?;
             }
+            "normal" | "orientation" | "direction" => match get_vec3(value.clone()) {
+                Ok(vec) => self.orientation = vec.into_orientation(),
+                Err(_) => {
+                    self.orientation = get_orientation(value)?;
+                }
+            },
+
             _ => {
                 return Err(config::ConfigError::Message(format!(
                     "Unknown light attribute: {key}"
@@ -53,14 +58,16 @@ impl LightBuilder {
                 position: self.position,
                 intensity: self.intensity,
             })),
-            "ambiant" => Ok(light_interface::ILight::AmbiantLight(ambiant::AmbiantLight {
-                color: self.color,
-                intensity: self.intensity,
-            })),
+            "ambiant" => Ok(light_interface::ILight::AmbiantLight(
+                ambiant::AmbiantLight {
+                    color: self.color,
+                    intensity: self.intensity,
+                },
+            )),
             "directional" => Ok(light_interface::ILight::DirectionalLight(
                 directional_light::DirectionalLight {
                     color: self.color,
-                    direction: self.direction.normalize(),
+                    direction: self.orientation.into_vec3(1.0),
                     intensity: self.intensity,
                 },
             )),

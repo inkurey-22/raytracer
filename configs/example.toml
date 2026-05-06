@@ -8,14 +8,18 @@ position = { x = 0.0, y = 1.0, z = -4.0 }
 direction = { x = 0.0, y = 0.0, z = 1.0 }
 
 [[lights.omni]]
-position = { x = 2.0, y = 4.0, z = -2.0 }
+position = { x = 5.0, y = 5.0, z = 0.0 }
 color = { r = 255, g = 255, b = 255 }
-intensity = 500
+intensity = 10
+
+[[lights.ambiant]]
+color = { r = 200, g = 200, b = 200 }
+intensity = 0.2
 
 [[lights.directional]]
 direction = { x = 0.0, y = -1.0, z = 0.0 }
 color = { r = 255, g = 255, b = 255 }
-intensity = 2
+intensity = 1
 
 [[objects.sphere]]
 position = { x = 0.0, y = 1.0, z = 0.0 }
@@ -26,7 +30,7 @@ color = { r = 255, g = 0, b = 0 }
 position = { x = 2.0, y = 1.0, z = 10.0}
 radius = 1.0
 color = { r = 0, g = 255, b = 0 }
-normal = { x = 0.0, y = 1.0, z = 0.0 }
+orientation = { p = 0.0, y = 45.0, r = 0.0 }
 
 [[objects.plane]]
 position = { x = 0.0, y = 0.0, z = 0.0 }
