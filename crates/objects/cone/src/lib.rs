@@ -24,16 +24,13 @@ impl fmt::Display for Cone {
 impl Cone {
     #[inline(always)]
     pub fn intersect(&self, ray: &Ray, epsilon: f64) -> Option<HitRecord> {
-         // Precompute cos(half_angle) and cos^2
         let cos_theta = self.half_angle.cos();
         let cos_theta_sq = cos_theta * cos_theta;
 
-        // Vector from apex to ray origin (S)
         let s = ray.origin - self.apex;
 
-        // Dot products needed for coefficients
         let s_dot_d = s.dot(&ray.direction);
-        let d_dot_d = ray.direction.dot(&ray.direction); // Should be 1.0 if normalized
+        let d_dot_d = ray.direction.dot(&ray.direction);
         let s_dot_n = s.dot(&self.normal);
         let d_dot_n = ray.direction.dot(&self.normal);
 
@@ -58,6 +55,9 @@ impl Cone {
         };
 
         let point = ray.at(t);
+        if (point - self.apex).dot(&self.normal) <= 0.0 {
+            return None;
+        }
         let v = point - self.apex;
         let cos_theta = self.half_angle.cos();
         let cos_theta_sq = cos_theta * cos_theta;
