@@ -11,13 +11,15 @@ pub struct Cylinder {
     pub radius: f64,
     pub color: Color,
     pub normal: Vec3,
+    pub limited: bool,
 }
 
 impl fmt::Display for Cylinder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Cylinder")?;
-        writeln!(f, "  center: {}", self.center)?;
-        write!(f, "  radius: {:.3}", self.radius)
+        writeln!(f, "      center: {}", self.center)?;
+        write!(f, "      radius: {:.3}", self.radius)?;
+        writeln!(f, "      limited: {}", self.limited)
     }
 }
 
@@ -50,6 +52,12 @@ impl Cylinder {
         
         let point = ray.at(t);
         let oc_hit = point - self.center;
+        if self.limited {
+            let height_on_axis = oc_hit.dot(&axis);
+            if height_on_axis < 0.0 || height_on_axis > 1.0 {
+                return None;
+            }
+        }
         let normal = (oc_hit - (axis * oc_hit.dot(&axis))).normalize();
         Some(HitRecord { point, normal, t })
     }

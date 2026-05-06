@@ -16,8 +16,8 @@ pub struct Cone {
 impl fmt::Display for Cone {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Cone")?;
-        writeln!(f, "  apex: {}", self.apex)?;
-        write!(f, "  angle: {:.3}", self.angle)
+        writeln!(f, "      apex: {}", self.apex)?;
+        write!(f, "      angle: {:.3}", self.angle)
     }
 }
 
