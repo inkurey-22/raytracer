@@ -287,24 +287,7 @@ pub fn render(
     for thread_id in 0..max_threads {
         let start_row = thread_id * rows_per_thread;
         let end_row = ((thread_id + 1) * rows_per_thread).min(height);
-<<<<<<< feat/cone
-
-        let handle = thread::spawn(move || {
-            for y in start_row..end_row {
-                let mut row = vec![Color::default(); width];
-                for (x, pixel) in row.iter_mut().enumerate() {
-                    let ray =
-                        generate_ray(&camera, x as f64, y as f64, width as f64, height as f64);
-                    *pixel = trace_ray(&ray, &lights, &objects, 0);
-                }
-                let mut img = image.lock().unwrap();
-                img[y] = row;
-            }
-        });
-        handles.push(handle);
-=======
         handles.push(spawn_render_thread(start_row, end_row, resources.clone()));
->>>>>>> main
     }
 
     for handle in handles {
