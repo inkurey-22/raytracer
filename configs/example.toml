@@ -27,11 +27,17 @@ radius = 1.0
 color = { r = 255, g = 0, b = 0 }
 
 [[objects.cylinder]]
-position = { x = 2.0, y = -2.0, z = 0.0}
+position = { x = 2.0, y = 2.0, z = 0.0}
+radius = 1.0
+color = { r = 0, g = 255, b = 0 }
+normal = { x = 10.0, y = 10.0, z = 0.0 }
+limited = true
+
+[[objects.cylinder]]
+position = { x = 2.0, y = 2.0, z = 10.0}
 radius = 1.0
 color = { r = 0, g = 255, b = 0 }
 normal = { x = 0.0, y = 10.0, z = 0.0 }
-limited = true
 
 [[objects.plane]]
 position = { x = 0.0, y = 0.0, z = 0.0 }
