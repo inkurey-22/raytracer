@@ -83,11 +83,43 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         }
     }
 
+    // Handle scene imports
+    //[[scenes]]
+    //path = "configs/test_importee.toml"
+    //
+    //[[scenes]]
+    //path = "configs/test_importee2.toml"
+    if let Ok(scene_entries) = settings.get_array("scenes") {
+        for scene_entry in scene_entries {
+            let scene_table = scene_entry.into_table()?;
+            if let Some(path_value) = scene_table.get("path") {
+                let import_path_str = path_value.clone().into_string()?;
+                let import_path = Path::new(&import_path_str);
+                let base_dir = Path::new(config_path).parent().unwrap_or(Path::new("."));
+                let resolved = if import_path.is_absolute() {
+                    import_path.to_path_buf()
+                } else {
+                    base_dir.join(import_path)
+                };
+                let resolved_str = resolved.to_str().ok_or_else(|| {
+                    config::ConfigError::Message(format!("Invalid import path: {:?}", resolved))
+                })?;
+                let imported = load_scene(resolved_str)?;
+                // merge imported objects and lights
+                for obj in imported.objects {
+                    objects.push(obj);
+                }
+                for light in imported.lights {
+                    lights.push(light);
+                }
+            }
+        }
+    }
+
     let ambiant_count = lights
         .iter()
         .filter(|light| matches!(light, light_interface::ILight::AmbiantLight(_)))
         .count();
-
     if ambiant_count > 1 {
         return Err(config::ConfigError::Message(
             "Only one ambient light is allowed.".to_string(),
