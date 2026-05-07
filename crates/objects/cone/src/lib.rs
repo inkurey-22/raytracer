@@ -1,9 +1,8 @@
-
 use std::fmt;
 
-use ray::{Ray, HitRecord};
-use vec3::Vec3;
 use color::Color;
+use ray::{HitRecord, Ray};
+use vec3::Vec3;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Cone {
@@ -42,7 +41,7 @@ impl Cone {
         if discriminant < 0.0 {
             return None;
         }
-        
+
         let sqrt_d = discriminant.sqrt();
         let t1 = (-b - sqrt_d) / (2.0 * a);
         let t2 = (-b + sqrt_d) / (2.0 * a);
