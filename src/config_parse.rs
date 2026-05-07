@@ -83,12 +83,6 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         }
     }
 
-    // Handle scene imports
-    //[[scenes]]
-    //path = "configs/test_importee.toml"
-    //
-    //[[scenes]]
-    //path = "configs/test_importee2.toml"
     if let Ok(scene_entries) = settings.get_array("scenes") {
         for scene_entry in scene_entries {
             let scene_table = scene_entry.into_table()?;
@@ -105,7 +99,6 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
                     config::ConfigError::Message(format!("Invalid import path: {:?}", resolved))
                 })?;
                 let imported = load_scene(resolved_str)?;
-                // merge imported objects and lights
                 for obj in imported.objects {
                     objects.push(obj);
                 }
