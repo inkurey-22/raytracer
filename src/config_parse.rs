@@ -6,9 +6,7 @@ use crate::utilities::{
 };
 
 pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError> {
-    let settings = config::Config::builder()
-        .add_source(config::File::from(Path::new(config_path)))
-        .build()?;
+    let settings = load_settings(config_path)?;
 
     if settings.get_table("camera").is_err() {
         return Err(config::ConfigError::Message(
@@ -83,32 +81,6 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         }
     }
 
-    if let Ok(scene_entries) = settings.get_array("scenes") {
-        for scene_entry in scene_entries {
-            let scene_table = scene_entry.into_table()?;
-            if let Some(path_value) = scene_table.get("path") {
-                let import_path_str = path_value.clone().into_string()?;
-                let import_path = Path::new(&import_path_str);
-                let base_dir = Path::new(config_path).parent().unwrap_or(Path::new("."));
-                let resolved = if import_path.is_absolute() {
-                    import_path.to_path_buf()
-                } else {
-                    base_dir.join(import_path)
-                };
-                let resolved_str = resolved.to_str().ok_or_else(|| {
-                    config::ConfigError::Message(format!("Invalid import path: {:?}", resolved))
-                })?;
-                let imported = load_scene(resolved_str)?;
-                for obj in imported.objects {
-                    objects.push(obj);
-                }
-                for light in imported.lights {
-                    lights.push(light);
-                }
-            }
-        }
-    }
-
     let ambiant_count = lights
         .iter()
         .filter(|light| matches!(light, light_interface::ILight::AmbiantLight(_)))
@@ -126,4 +98,29 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         width,
         height,
     })
+}
+
+fn load_settings(config_path: &str) -> Result<config::Config, config::ConfigError> {
+    let settings = config::Config::builder()
+        .add_source(config::File::with_name(config_path))
+        .build()?;
+
+    let mut complete_settings_builder = config::Config::builder();
+    complete_settings_builder =
+        complete_settings_builder.add_source(config::File::from(Path::new(config_path)));
+
+    for scene_path in get_value_at(&settings, "scenes.list")?.into_array()? {
+        let scene_path_str = scene_path.into_string().map_err(|e| {
+            config::ConfigError::Message(format!("Scene path '{:?}' is not a string", e))
+        })?;
+        let full_scene_path = Path::new(config_path)
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join(scene_path_str);
+        println!("Loading scene from: {}", full_scene_path.display());
+        complete_settings_builder = complete_settings_builder.add_source(config::File::from(
+            Path::new(full_scene_path.to_str().unwrap()),
+        ));
+    }
+    complete_settings_builder.build()
 }
