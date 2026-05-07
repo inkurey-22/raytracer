@@ -16,6 +16,12 @@ pub fn get_f64(value: config::Value) -> Result<f64, config::ConfigError> {
         .map_err(|_| config::ConfigError::Message("Expected a floating-point number".to_string()))
 }
 
+pub fn get_bool(value: config::Value) -> Result<bool, config::ConfigError> {
+    value
+        .into_bool()
+        .map_err(|_| config::ConfigError::Message("Expected a boolean value".to_string()))
+}
+
 pub fn get_vec3(value: config::Value) -> Result<Vec3, config::ConfigError> {
     let table = value
         .into_table()

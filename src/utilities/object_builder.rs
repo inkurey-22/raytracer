@@ -1,4 +1,4 @@
-use crate::utilities::value_reading::{get_color, get_f64, get_vec3};
+use crate::utilities::value_reading::{get_bool, get_color, get_f64, get_vec3};
 use color::Color;
 use vec3::Vec3;
 
@@ -9,6 +9,7 @@ pub struct ObjectBuilder {
     radius: f64,
     angle: f64,
     apex: Vec3,
+    limited: bool,
 }
 
 impl ObjectBuilder {
@@ -20,6 +21,7 @@ impl ObjectBuilder {
             radius: 1.0,
             angle: 0.0,
             apex: Vec3::new(0.0, 0.0, 0.0),
+            limited: false,
         }
     }
 
@@ -47,6 +49,9 @@ impl ObjectBuilder {
             "apex" => {
                 self.apex = get_vec3(value)?;
             }
+            "limited" => {
+                self.limited = get_bool(value)?;
+            }
 
             _ => {
                 return Err(config::ConfigError::Message(format!(
@@ -72,6 +77,7 @@ impl ObjectBuilder {
                 center: self.position,
                 radius: self.radius,
                 normal: self.normal,
+                limited: self.limited,
             })),
             "cone" => Ok(object_interface::IObject::Cone(cone::Cone {
                 color: self.color,
