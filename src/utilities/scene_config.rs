@@ -13,7 +13,7 @@ pub struct SceneConfig {
 
 impl fmt::Display for SceneConfig {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "Scene")?;
+        writeln!(f, "Scene:")?;
         writeln!(f, "  width: {}, height: {}", self.width, self.height)?;
         writeln!(f, "{}", self.camera)?;
 
@@ -26,7 +26,7 @@ impl fmt::Display for SceneConfig {
             }
         }
 
-        writeln!(f)?;
+        /*writeln!(f)?;
         if let Some(light_interface::ILight::AmbiantLight(ambiant_light)) = self
             .lights
             .iter()
@@ -37,7 +37,7 @@ impl fmt::Display for SceneConfig {
             writeln!(f, "    intensity: {:.3}", ambiant_light.intensity)?;
         } else {
             writeln!(f, "  Ambiant Light: none")?;
-        }
+        }*/
 
         if self.objects.is_empty() {
             writeln!(f, "  Objects: none")?;
