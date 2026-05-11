@@ -109,18 +109,20 @@ fn load_settings(config_path: &str) -> Result<config::Config, config::ConfigErro
     complete_settings_builder =
         complete_settings_builder.add_source(config::File::from(Path::new(config_path)));
 
-    for scene_path in get_value_at(&settings, "scenes.list")?.into_array()? {
-        let scene_path_str = scene_path.into_string().map_err(|e| {
-            config::ConfigError::Message(format!("Scene path '{:?}' is not a string", e))
-        })?;
-        let full_scene_path = Path::new(config_path)
-            .parent()
-            .unwrap_or_else(|| Path::new("."))
-            .join(scene_path_str);
-        println!("Loading scene from: {}", full_scene_path.display());
-        complete_settings_builder = complete_settings_builder.add_source(config::File::from(
-            Path::new(full_scene_path.to_str().unwrap()),
-        ));
+    if let Ok(scene_list) = get_value_at(&settings, "scenes.list") {
+        for scene_path in scene_list.into_array()? {
+            let scene_path_str = scene_path.into_string().map_err(|e| {
+                config::ConfigError::Message(format!("Scene path '{:?}' is not a string", e))
+            })?;
+            let full_scene_path = Path::new(config_path)
+                .parent()
+                .unwrap_or_else(|| Path::new("."))
+                .join(scene_path_str);
+            println!("Loading scene from: {}", full_scene_path.display());
+            complete_settings_builder = complete_settings_builder.add_source(config::File::from(
+                Path::new(full_scene_path.to_str().unwrap()),
+            ));
+        }
     }
     complete_settings_builder.build()
 }
