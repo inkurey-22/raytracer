@@ -55,8 +55,8 @@ impl DirectionalLight {
 impl fmt::Display for DirectionalLight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "DirectionalLight")?;
-        writeln!(f, "  direction: {}", self.direction)?;
-        writeln!(f, "  color: {}", self.color)?;
-        write!(f, "  intensity: {:.3}", self.intensity)
+        writeln!(f, "      direction: {}", self.direction)?;
+        writeln!(f, "      color: {}", self.color)?;
+        writeln!(f, "      intensity: {:.3}", self.intensity)
     }
 }

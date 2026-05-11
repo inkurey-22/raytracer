@@ -24,7 +24,7 @@ impl Default for AmbiantLight {
 impl fmt::Display for AmbiantLight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "AmbiantLight")?;
-        writeln!(f, "  color: {}", self.color)?;
-        write!(f, "  intensity: {:.3}", self.intensity)
+        writeln!(f, "      color: {}", self.color)?;
+        writeln!(f, "      intensity: {:.3}", self.intensity)
     }
 }

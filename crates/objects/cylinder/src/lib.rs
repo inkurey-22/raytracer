@@ -17,8 +17,10 @@ impl fmt::Display for Cylinder {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Cylinder")?;
         writeln!(f, "      center: {}", self.center)?;
-        write!(f, "      radius: {:.3}", self.radius)?;
-        writeln!(f, "      limited: {}", self.limited)
+        writeln!(f, "      radius: {:.3}", self.radius)?;
+        writeln!(f, "      limited: {}", self.limited)?;
+        writeln!(f, "      normal: {}", self.normal)?;
+        writeln!(f, "      color: {}", self.color)
     }
 }
 
@@ -92,14 +94,10 @@ impl Cylinder {
         closest_hit.map(|(t, point)| {
             let oc_hit = point - self.center;
             let height = oc_hit.dot(&axis);
-            let normal = if self.limited {
-                if height <= 0.0 {
-                    -axis
-                } else if height >= 1.0 {
-                    axis
-                } else {
-                    (oc_hit - axis * height).normalize()
-                }
+            let normal = if height <= 0.0 {
+                -axis
+            } else if height >= 1.0 {
+                axis
             } else {
                 (oc_hit - axis * height).normalize()
             };
