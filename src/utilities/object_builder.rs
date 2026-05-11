@@ -84,6 +84,7 @@ impl ObjectBuilder {
                 apex: self.apex,
                 angle: self.angle,
                 normal: self.normal,
+                limited: self.limited,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
