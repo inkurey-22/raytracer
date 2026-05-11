@@ -4,7 +4,7 @@ mod raytracing;
 mod utilities;
 
 use args::Args;
-use raytracing::{render, write_ppm};
+use raytracing::{SamplingConfig, render, write_ppm};
 use std::path::Path;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -25,8 +25,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let width = args.width.unwrap_or(scene.width);
     let height = args.height.unwrap_or(scene.height);
 
-    println!("Rendering {}x{}...", width, height);
-    let image = render(&scene.camera, width, height, &scene.lights, &scene.objects);
+    let sampling_config = SamplingConfig {
+        samples_per_pixel: args.samples_per_pixel.unwrap_or(16),
+        variance_threshold: args.variance_threshold.unwrap_or(0.01),
+    };
+
+    println!(
+        "Rendering {}x{} with adaptive supersampling...",
+        width, height
+    );
+    println!("  Samples per pixel: {}", sampling_config.samples_per_pixel);
+    println!(
+        "  Variance threshold: {}",
+        sampling_config.variance_threshold
+    );
+
+    let image = render(
+        &scene.camera,
+        width,
+        height,
+        &scene.lights,
+        &scene.objects,
+        sampling_config,
+    );
 
     println!("Writing to {}...", output_path);
     write_ppm(&output_path, &image)?;

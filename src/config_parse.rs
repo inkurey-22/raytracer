@@ -6,9 +6,7 @@ use crate::utilities::{
 };
 
 pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError> {
-    let settings = config::Config::builder()
-        .add_source(config::File::from(Path::new(config_path)))
-        .build()?;
+    let settings = load_settings(config_path)?;
 
     if settings.get_table("camera").is_err() {
         return Err(config::ConfigError::Message(
@@ -87,7 +85,6 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         .iter()
         .filter(|light| matches!(light, light_interface::ILight::AmbiantLight(_)))
         .count();
-
     if ambiant_count > 1 {
         return Err(config::ConfigError::Message(
             "Only one ambient light is allowed.".to_string(),
@@ -101,4 +98,29 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
         width,
         height,
     })
+}
+
+fn load_settings(config_path: &str) -> Result<config::Config, config::ConfigError> {
+    let settings = config::Config::builder()
+        .add_source(config::File::with_name(config_path))
+        .build()?;
+
+    let mut complete_settings_builder = config::Config::builder();
+    complete_settings_builder =
+        complete_settings_builder.add_source(config::File::from(Path::new(config_path)));
+
+    for scene_path in get_value_at(&settings, "scenes.list")?.into_array()? {
+        let scene_path_str = scene_path.into_string().map_err(|e| {
+            config::ConfigError::Message(format!("Scene path '{:?}' is not a string", e))
+        })?;
+        let full_scene_path = Path::new(config_path)
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join(scene_path_str);
+        println!("Loading scene from: {}", full_scene_path.display());
+        complete_settings_builder = complete_settings_builder.add_source(config::File::from(
+            Path::new(full_scene_path.to_str().unwrap()),
+        ));
+    }
+    complete_settings_builder.build()
 }

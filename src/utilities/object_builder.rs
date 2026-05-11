@@ -1,4 +1,4 @@
-use crate::utilities::value_reading::{get_color, get_f64, get_orientation, get_vec3};
+use crate::utilities::value_reading::{get_bool, get_color, get_f64, get_orientation, get_vec3};
 use color::Color;
 use orientation::{Orientation, Vec3OrientationExt};
 use vec3::Vec3;
@@ -8,6 +8,9 @@ pub struct ObjectBuilder {
     position: Vec3,
     orientation: Orientation,
     radius: f64,
+    angle: f64,
+    apex: Vec3,
+    limited: bool,
 }
 
 impl ObjectBuilder {
@@ -17,6 +20,9 @@ impl ObjectBuilder {
             position: Vec3::new(0.0, 0.0, 0.0),
             orientation: Orientation::new(0.0, 0.0, 0.0),
             radius: 1.0,
+            angle: 0.0,
+            apex: Vec3::new(0.0, 0.0, 0.0),
+            limited: false,
         }
     }
 
@@ -34,6 +40,15 @@ impl ObjectBuilder {
             }
             "radius" => {
                 self.radius = get_f64(value)?;
+            }
+            "angle" => {
+                self.angle = get_f64(value)?;
+            }
+            "apex" => {
+                self.apex = get_vec3(value)?;
+            }
+            "limited" => {
+                self.limited = get_bool(value)?;
             }
             "normal" | "orientation" | "direction" => match get_vec3(value.clone()) {
                 Ok(vec) => self.orientation = vec.into_orientation(),
@@ -65,7 +80,15 @@ impl ObjectBuilder {
                 color: self.color,
                 center: self.position,
                 radius: self.radius,
-                normal: self.orientation.into_vec3(1.0),
+                normal: self.normal,
+                limited: self.limited,
+            })),
+            "cone" => Ok(object_interface::IObject::Cone(cone::Cone {
+                color: self.color,
+                apex: self.apex,
+                angle: self.angle,
+                normal: self.normal,
+                limited: self.limited,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
