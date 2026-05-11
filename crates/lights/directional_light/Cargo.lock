@@ -16,6 +16,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "directional_light"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "object_interface",
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "object_interface"
 version = "0.1.0"
 dependencies = [
@@ -24,16 +34,6 @@ dependencies = [
  "plane",
  "ray",
  "sphere",
-]
-
-[[package]]
-name = "omni_light"
-version = "0.1.0"
-dependencies = [
- "color",
- "object_interface",
- "ray",
- "vec3",
 ]
 
 [[package]]

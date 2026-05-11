@@ -1,11 +1,12 @@
-use crate::utilities::value_reading::{get_bool, get_color, get_f64, get_vec3};
+use crate::utilities::value_reading::{get_bool, get_color, get_f64, get_orientation, get_vec3};
 use color::Color;
+use orientation::{Orientation, Vec3OrientationExt};
 use vec3::Vec3;
 
 pub struct ObjectBuilder {
     color: Color,
     position: Vec3,
-    normal: Vec3,
+    orientation: Orientation,
     radius: f64,
     angle: f64,
     apex: Vec3,
@@ -17,7 +18,7 @@ impl ObjectBuilder {
         Self {
             color: Color::new(1.0, 1.0, 1.0),
             position: Vec3::new(0.0, 0.0, 0.0),
-            normal: Vec3::new(0.0, 0.0, 0.0),
+            orientation: Orientation::new(0.0, 0.0, 0.0),
             radius: 1.0,
             angle: 0.0,
             apex: Vec3::new(0.0, 0.0, 0.0),
@@ -37,9 +38,6 @@ impl ObjectBuilder {
             "position" => {
                 self.position = get_vec3(value)?;
             }
-            "normal" => {
-                self.normal = get_vec3(value)?;
-            }
             "radius" => {
                 self.radius = get_f64(value)?;
             }
@@ -52,6 +50,12 @@ impl ObjectBuilder {
             "limited" => {
                 self.limited = get_bool(value)?;
             }
+            "normal" | "orientation" | "direction" => match get_vec3(value.clone()) {
+                Ok(vec) => self.orientation = vec.into_orientation(),
+                Err(_) => {
+                    self.orientation = get_orientation(value)?;
+                }
+            },
 
             _ => {
                 return Err(config::ConfigError::Message(format!(
@@ -89,7 +93,7 @@ impl ObjectBuilder {
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
                 point: self.position,
-                normal: self.normal,
+                normal: self.orientation.into_vec3(1.0),
             })),
             other => Err(config::ConfigError::Message(format!(
                 "Unknown object type: {other}"

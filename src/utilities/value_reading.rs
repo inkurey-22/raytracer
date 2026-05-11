@@ -1,4 +1,5 @@
 use color::Color;
+use orientation::Orientation;
 use vec3::Vec3;
 
 pub fn get_value_at(
@@ -97,5 +98,32 @@ pub fn get_color(value: config::Value) -> Result<Color, config::ConfigError> {
                 .into_float()
                 .map_err(|_| config::ConfigError::Message("Invalid Color.b".to_string()))?,
         ),
+    })
+}
+
+pub fn get_orientation(value: config::Value) -> Result<Orientation, config::ConfigError> {
+    let table = value.into_table().map_err(|_| {
+        config::ConfigError::Message("Expected a table for Orientation".to_string())
+    })?;
+
+    Ok(Orientation {
+        p: table
+            .get("p")
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message("Missing Orientation.p".to_string()))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message("Invalid Orientation.p".to_string()))?,
+        y: table
+            .get("y")
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message("Missing Orientation.y".to_string()))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message("Invalid Orientation.y".to_string()))?,
+        r: table
+            .get("r")
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message("Missing Orientation.r".to_string()))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message("Invalid Orientation.r".to_string()))?,
     })
 }
