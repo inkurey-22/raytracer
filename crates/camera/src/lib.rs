@@ -14,14 +14,14 @@ impl Default for Camera {
         Camera {
             fov: 60.0,
             position: Vec3 {
-                x: 0.0,
-                y: 1.0,
-                z: -5.0,
-            },
-            direction: Vec3 {
-                x: 0.0,
+                x: -5.0,
                 y: 0.0,
                 z: 1.0,
+            },
+            direction: Vec3 {
+                x: 1.0,
+                y: 0.0,
+                z: 0.0,
             },
         }
     }

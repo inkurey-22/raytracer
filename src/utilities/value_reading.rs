@@ -27,25 +27,39 @@ pub fn get_vec3(value: config::Value) -> Result<Vec3, config::ConfigError> {
         .into_table()
         .map_err(|_| config::ConfigError::Message("Expected a table for Vec3".to_string()))?;
 
+    let has_domain_axes =
+        table.contains_key("depth") || table.contains_key("right") || table.contains_key("up");
+    let has_xyz_axes =
+        table.contains_key("x") || table.contains_key("y") || table.contains_key("z");
+
+    if has_domain_axes && has_xyz_axes {
+        return Err(config::ConfigError::Message(
+            "Vec3 must use either {depth,right,up} or {x,y,z}, not both".to_string(),
+        ));
+    }
+
+    let (x_key, y_key, z_key) = if has_domain_axes {
+        ("depth", "right", "up")
+    } else {
+        ("x", "y", "z")
+    };
+
+    fn read_component(
+        table: &config::Map<String, config::Value>,
+        key: &str,
+    ) -> Result<f64, config::ConfigError> {
+        table
+            .get(key)
+            .cloned()
+            .ok_or_else(|| config::ConfigError::Message(format!("Missing Vec3.{key}")))?
+            .into_float()
+            .map_err(|_| config::ConfigError::Message(format!("Invalid Vec3.{key}")))
+    }
+
     Ok(Vec3 {
-        x: table
-            .get("x")
-            .cloned()
-            .ok_or_else(|| config::ConfigError::Message("Missing Vec3.x".to_string()))?
-            .into_float()
-            .map_err(|_| config::ConfigError::Message("Invalid Vec3.x".to_string()))?,
-        y: table
-            .get("y")
-            .cloned()
-            .ok_or_else(|| config::ConfigError::Message("Missing Vec3.y".to_string()))?
-            .into_float()
-            .map_err(|_| config::ConfigError::Message("Invalid Vec3.y".to_string()))?,
-        z: table
-            .get("z")
-            .cloned()
-            .ok_or_else(|| config::ConfigError::Message("Missing Vec3.z".to_string()))?
-            .into_float()
-            .map_err(|_| config::ConfigError::Message("Invalid Vec3.z".to_string()))?,
+        x: read_component(&table, x_key)?,
+        y: read_component(&table, y_key)?,
+        z: read_component(&table, z_key)?,
     })
 }
 

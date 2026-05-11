@@ -1,9 +1,9 @@
 use color::Color;
+use cone::Cone;
+use cylinder::Cylinder;
 use plane::Plane;
 use ray::{HitRecord, Ray};
 use sphere::Sphere;
-use cylinder::Cylinder;
-use cone::Cone;
 
 #[derive(Debug, Clone)]
 pub enum IObject {

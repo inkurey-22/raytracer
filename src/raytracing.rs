@@ -142,7 +142,7 @@ pub fn trace_ray(
             compute_lighting(hit.point, hit.normal, hit.object, lights, objects).normalize_max()
         }
         None => {
-            let t = 0.5 * (ray.direction.x + 1.0);
+            let t = 0.5 * (ray.direction.z + 1.0);
             Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
         }
     }
@@ -210,11 +210,16 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
     let height_at_distance = 2.0 * (fov_rad / 2.0).tan();
     let width_at_distance = height_at_distance * aspect;
 
-    let right = camera
-        .direction
-        .cross(&Vec3::new(0.0, 1.0, 0.0))
-        .normalize();
-    let up = right.cross(&camera.direction).normalize();
+    let forward = camera.direction.normalize();
+    let world_up = Vec3::new(0.0, 0.0, 1.0);
+    let world_right = Vec3::new(0.0, 1.0, 0.0);
+
+    let right = if world_up.cross(&forward).length() > EPSILON {
+        world_up.cross(&forward).normalize()
+    } else {
+        world_right.cross(&forward).normalize()
+    };
+    let up = forward.cross(&right).normalize();
 
     let ndc_x = (x + 0.5) / width;
     let ndc_y = (y + 0.5) / height;
@@ -222,7 +227,7 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
     let px = (ndc_x - 0.5) * width_at_distance;
     let py = (0.5 - ndc_y) * height_at_distance;
 
-    let direction = camera.direction + right * px + up * py;
+    let direction = forward + right * px + up * py;
 
     Ray::new(camera.position, direction)
 }
@@ -326,4 +331,63 @@ pub fn write_ppm(filename: &str, image: &[Vec<Color>]) -> std::io::Result<()> {
     let mut file = File::create(filename)?;
     file.write_all(buffer.as_bytes())?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn z_up_camera() -> Camera {
+        Camera {
+            fov: 60.0,
+            position: Vec3::new(0.0, 0.0, 0.0),
+            direction: Vec3::new(1.0, 0.0, 0.0),
+        }
+    }
+
+    #[test]
+    fn center_ray_matches_depth_axis() {
+        let camera = z_up_camera();
+        let width = 200.0;
+        let height = 100.0;
+        let center = generate_ray(
+            &camera,
+            width / 2.0 - 0.5,
+            height / 2.0 - 0.5,
+            width,
+            height,
+        );
+
+        assert!((center.direction.x - 1.0).abs() < 1e-12);
+        assert!(center.direction.y.abs() < 1e-12);
+        assert!(center.direction.z.abs() < 1e-12);
+    }
+
+    #[test]
+    fn right_pixels_map_to_y_axis() {
+        let camera = z_up_camera();
+        let width = 100.0;
+        let height = 100.0;
+        let mid_y = height / 2.0 - 0.5;
+
+        let left_ray = generate_ray(&camera, 0.0, mid_y, width, height);
+        let right_ray = generate_ray(&camera, width - 1.0, mid_y, width, height);
+
+        assert!(left_ray.direction.y < 0.0);
+        assert!(right_ray.direction.y > 0.0);
+    }
+
+    #[test]
+    fn vertical_pixels_map_to_z_axis() {
+        let camera = z_up_camera();
+        let width = 100.0;
+        let height = 100.0;
+        let mid_x = width / 2.0 - 0.5;
+
+        let top_ray = generate_ray(&camera, mid_x, 0.0, width, height);
+        let bottom_ray = generate_ray(&camera, mid_x, height - 1.0, width, height);
+
+        assert!(top_ray.direction.z > 0.0);
+        assert!(bottom_ray.direction.z < 0.0);
+    }
 }

@@ -14,7 +14,7 @@ impl LightBuilder {
         Self {
             color: Color::new(1.0, 1.0, 1.0),
             position: Vec3::new(0.0, 0.0, 0.0),
-            direction: Vec3::new(0.0, -1.0, 0.0),
+            direction: Vec3::new(0.0, 0.0, -1.0),
             intensity: 1.0,
         }
     }
