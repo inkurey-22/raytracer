@@ -80,14 +80,14 @@ impl ObjectBuilder {
                 color: self.color,
                 center: self.position,
                 radius: self.radius,
-                normal: self.normal,
+                normal: self.orientation.into_vec3(1.0),
                 limited: self.limited,
             })),
             "cone" => Ok(object_interface::IObject::Cone(cone::Cone {
                 color: self.color,
                 apex: self.apex,
                 angle: self.angle,
-                normal: self.normal,
+                normal: self.orientation.into_vec3(1.0),
                 limited: self.limited,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
