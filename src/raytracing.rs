@@ -212,12 +212,12 @@ pub fn generate_ray(camera: &Camera, x: f64, y: f64, width: f64, height: f64) ->
 
     let forward = camera.direction.normalize();
     let world_up = Vec3::new(0.0, 0.0, 1.0);
-    let world_horizontal = Vec3::new(0.0, 1.0, 0.0);
+    let world_right = Vec3::new(0.0, 1.0, 0.0);
 
     let right = if world_up.cross(&forward).length() > EPSILON {
         world_up.cross(&forward).normalize()
     } else {
-        world_horizontal.cross(&forward).normalize()
+        world_right.cross(&forward).normalize()
     };
     let up = forward.cross(&right).normalize();
 
@@ -364,7 +364,7 @@ mod tests {
     }
 
     #[test]
-    fn horizontal_pixels_map_to_y_axis() {
+    fn right_pixels_map_to_y_axis() {
         let camera = z_up_camera();
         let width = 100.0;
         let height = 100.0;

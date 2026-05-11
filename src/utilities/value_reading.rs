@@ -28,18 +28,18 @@ pub fn get_vec3(value: config::Value) -> Result<Vec3, config::ConfigError> {
         .map_err(|_| config::ConfigError::Message("Expected a table for Vec3".to_string()))?;
 
     let has_domain_axes =
-        table.contains_key("depth") || table.contains_key("horizontal") || table.contains_key("up");
+        table.contains_key("depth") || table.contains_key("right") || table.contains_key("up");
     let has_xyz_axes =
         table.contains_key("x") || table.contains_key("y") || table.contains_key("z");
 
     if has_domain_axes && has_xyz_axes {
         return Err(config::ConfigError::Message(
-            "Vec3 must use either {depth,horizontal,up} or {x,y,z}, not both".to_string(),
+            "Vec3 must use either {depth,right,up} or {x,y,z}, not both".to_string(),
         ));
     }
 
     let (x_key, y_key, z_key) = if has_domain_axes {
-        ("depth", "horizontal", "up")
+        ("depth", "right", "up")
     } else {
         ("x", "y", "z")
     };
