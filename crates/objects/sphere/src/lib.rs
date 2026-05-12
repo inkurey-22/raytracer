@@ -9,6 +9,7 @@ pub struct Sphere {
     pub color: Color,
     pub center: Vec3,
     pub radius: f64,
+    pub reflectiveness: f64,
 }
 
 impl Sphere {
@@ -44,6 +45,7 @@ impl fmt::Display for Sphere {
         writeln!(f, "Sphere")?;
         writeln!(f, "      center: {}", self.center)?;
         writeln!(f, "      radius: {:.3}", self.radius)?;
+        writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
         writeln!(f, "      color: {}", self.color)
     }
 }

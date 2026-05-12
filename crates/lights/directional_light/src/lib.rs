@@ -34,11 +34,18 @@ fn is_obstructed(ray: &Ray, objects: &[object_interface::IObject]) -> bool {
     false
 }
 
+fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
+    direction - normal * (2.0 * direction.dot(&normal))
+}
+
 impl DirectionalLight {
     pub fn compute_contribution(
         &self,
         hit_point: Vec3,
         normal: Vec3,
+        view_dir: Vec3,
+        surface_color: Color,
+        reflectiveness: f64,
         objects: &[object_interface::IObject],
     ) -> Color {
         let light_dir = -self.direction.normalize();
@@ -48,7 +55,17 @@ impl DirectionalLight {
         }
 
         let diffuse_intensity = normal.dot(&light_dir).max(0.0);
-        self.color * self.intensity * diffuse_intensity
+        let diffuse = self.color * self.intensity * diffuse_intensity * surface_color;
+
+        let reflected_light = reflect(-light_dir, normal).normalize();
+        let specular_intensity = reflected_light
+            .dot(&view_dir.normalize())
+            .max(0.0)
+            .powf(32.0)
+            * reflectiveness;
+        let specular = self.color * self.intensity * specular_intensity;
+
+        diffuse + specular
     }
 }
 

@@ -1,4 +1,6 @@
-use crate::utilities::value_reading::{get_bool, get_color, get_f64, get_orientation, get_vec3};
+use crate::utilities::value_reading::{
+    get_bool, get_color, get_f64, get_orientation, get_percentage, get_vec3,
+};
 use color::Color;
 use orientation::{Orientation, Vec3OrientationExt};
 use vec3::Vec3;
@@ -11,6 +13,7 @@ pub struct ObjectBuilder {
     angle: f64,
     apex: Vec3,
     limited: bool,
+    reflectiveness: f64,
 }
 
 impl ObjectBuilder {
@@ -23,6 +26,7 @@ impl ObjectBuilder {
             angle: 0.0,
             apex: Vec3::new(0.0, 0.0, 0.0),
             limited: false,
+            reflectiveness: 0.0,
         }
     }
 
@@ -50,6 +54,9 @@ impl ObjectBuilder {
             "limited" => {
                 self.limited = get_bool(value)?;
             }
+            "reflectiveness" | "reflectivity" | "reflective" => {
+                self.reflectiveness = get_percentage(value)?;
+            }
             "normal" | "orientation" | "direction" => match get_vec3(value.clone()) {
                 Ok(vec) => self.orientation = vec.into_orientation(),
                 Err(_) => {
@@ -75,6 +82,7 @@ impl ObjectBuilder {
                 color: self.color,
                 center: self.position,
                 radius: self.radius,
+                reflectiveness: self.reflectiveness,
             })),
             "cylinder" => Ok(object_interface::IObject::Cylinder(cylinder::Cylinder {
                 color: self.color,
@@ -82,6 +90,7 @@ impl ObjectBuilder {
                 radius: self.radius,
                 normal: self.orientation.into_vec3(1.0),
                 limited: self.limited,
+                reflectiveness: self.reflectiveness,
             })),
             "cone" => Ok(object_interface::IObject::Cone(cone::Cone {
                 color: self.color,
@@ -89,11 +98,13 @@ impl ObjectBuilder {
                 angle: self.angle,
                 normal: self.orientation.into_vec3(1.0),
                 limited: self.limited,
+                reflectiveness: self.reflectiveness,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
                 point: self.position,
                 normal: self.orientation.into_vec3(1.0),
+                reflectiveness: self.reflectiveness,
             })),
             other => Err(config::ConfigError::Message(format!(
                 "Unknown object type: {other}"

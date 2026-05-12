@@ -11,6 +11,7 @@ pub struct Cylinder {
     pub color: Color,
     pub normal: Vec3,
     pub limited: bool,
+    pub reflectiveness: f64,
 }
 
 impl fmt::Display for Cylinder {
@@ -20,6 +21,7 @@ impl fmt::Display for Cylinder {
         writeln!(f, "      radius: {:.3}", self.radius)?;
         writeln!(f, "      limited: {}", self.limited)?;
         writeln!(f, "      normal: {}", self.normal)?;
+        writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
         writeln!(f, "      color: {}", self.color)
     }
 }
