@@ -9,6 +9,7 @@ pub struct Plane {
     pub color: Color,
     pub point: Vec3,
     pub normal: Vec3,
+    pub reflectiveness: f64,
 }
 
 impl Plane {
@@ -34,6 +35,7 @@ impl fmt::Display for Plane {
         writeln!(f, "Plane")?;
         writeln!(f, "      point: {}", self.point)?;
         writeln!(f, "      normal: {}", self.normal)?;
+        writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
         writeln!(f, "      color: {}", self.color)
     }
 }

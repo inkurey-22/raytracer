@@ -31,6 +31,15 @@ impl IObject {
             IObject::Cone(cone) => cone.color,
         }
     }
+
+    pub fn get_reflectiveness(&self) -> f64 {
+        match self {
+            IObject::Plane(plane) => plane.reflectiveness,
+            IObject::Sphere(sphere) => sphere.reflectiveness,
+            IObject::Cylinder(cylinder) => cylinder.reflectiveness,
+            IObject::Cone(cone) => cone.reflectiveness,
+        }
+    }
 }
 
 impl std::fmt::Display for IObject {

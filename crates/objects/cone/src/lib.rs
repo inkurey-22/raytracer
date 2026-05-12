@@ -11,6 +11,7 @@ pub struct Cone {
     pub color: Color,
     pub normal: Vec3,
     pub limited: bool,
+    pub reflectiveness: f64,
 }
 
 impl fmt::Display for Cone {
@@ -19,6 +20,7 @@ impl fmt::Display for Cone {
         writeln!(f, "      apex: {}", self.apex)?;
         writeln!(f, "      angle: {:.3}", self.angle)?;
         writeln!(f, "      normal: {}", self.normal)?;
+        writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
         writeln!(f, "      color: {}", self.color)
     }
 }
@@ -28,7 +30,7 @@ impl Cone {
     pub fn intersect(&self, ray: &Ray, epsilon: f64) -> Option<HitRecord> {
         let height = self.normal.dot(&self.normal).sqrt();
         let normal_normalized = self.normal / height;
-        
+
         let cos_theta = self.angle.cos();
         let cos_theta_sq = cos_theta * cos_theta;
 
@@ -67,7 +69,7 @@ impl Cone {
         if t_valid.is_none() && self.limited {
             let base_point = self.apex + normal_normalized * height;
             let denominator = ray.direction.dot(&normal_normalized);
-            
+
             if denominator.abs() > epsilon {
                 let t_base = (base_point - ray.origin).dot(&normal_normalized) / denominator;
                 if t_base > epsilon {
@@ -75,9 +77,13 @@ impl Cone {
                     let v = point - base_point;
                     let dist_from_axis = (v.dot(&v)).sqrt();
                     let base_radius = height * self.angle.tan();
-                    
+
                     if dist_from_axis <= base_radius {
-                        return Some(HitRecord { point, normal: normal_normalized, t: t_base });
+                        return Some(HitRecord {
+                            point,
+                            normal: normal_normalized,
+                            t: t_base,
+                        });
                     }
                 }
             }

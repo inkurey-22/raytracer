@@ -17,6 +17,23 @@ pub fn get_f64(value: config::Value) -> Result<f64, config::ConfigError> {
         .map_err(|_| config::ConfigError::Message("Expected a floating-point number".to_string()))
 }
 
+pub fn get_percentage(value: config::Value) -> Result<f64, config::ConfigError> {
+    let raw_value = match value.clone().into_float() {
+        Ok(value) => value,
+        Err(_) => value.into_int().map(|value| value as f64).map_err(|_| {
+            config::ConfigError::Message("Expected a numeric percentage".to_string())
+        })?,
+    };
+
+    if !(0.0..=100.0).contains(&raw_value) {
+        return Err(config::ConfigError::Message(
+            "Expected a percentage between 0 and 100".to_string(),
+        ));
+    }
+
+    Ok(raw_value / 100.0)
+}
+
 pub fn get_bool(value: config::Value) -> Result<bool, config::ConfigError> {
     value
         .into_bool()

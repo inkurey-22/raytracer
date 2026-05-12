@@ -17,16 +17,35 @@ impl ILight {
         &self,
         hit_point: Vec3,
         normal: Vec3,
+        view_dir: Vec3,
+        surface_color: Color,
+        reflectiveness: f64,
         objects: &[object_interface::IObject],
     ) -> Color {
         match self {
             ILight::OmniLight(omni_light) => {
-                omni_light.compute_contribution(hit_point, normal, objects)
+                omni_light.compute_contribution(
+                    hit_point,
+                    normal,
+                    view_dir,
+                    surface_color,
+                    reflectiveness,
+                    objects,
+                )
             }
             ILight::DirectionalLight(directional_light) => {
-                directional_light.compute_contribution(hit_point, normal, objects)
+                directional_light.compute_contribution(
+                    hit_point,
+                    normal,
+                    view_dir,
+                    surface_color,
+                    reflectiveness,
+                    objects,
+                )
             }
-            ILight::AmbiantLight(ambiant_light) => ambiant_light.color * ambiant_light.intensity,
+            ILight::AmbiantLight(ambiant_light) => {
+                ambiant_light.color * ambiant_light.intensity * surface_color
+            }
         }
     }
 }

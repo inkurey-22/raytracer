@@ -114,17 +114,29 @@ pub fn find_closest_hit(ray: &Ray, objects: &[object_interface::IObject]) -> Opt
 pub fn compute_lighting(
     hit_point: Vec3,
     normal: Vec3,
-    hit_object: object_interface::IObject,
+    view_dir: Vec3,
+    hit_object: &object_interface::IObject,
     lights: &[light_interface::ILight],
     objects: &[object_interface::IObject],
 ) -> Color {
     let mut lighting = Color::new(0.0, 0.0, 0.0);
 
     for light in lights {
-        lighting += light.compute_contribution(hit_point, normal, objects);
+        lighting += light.compute_contribution(
+            hit_point,
+            normal,
+            view_dir,
+            hit_object.get_color(),
+            hit_object.get_reflectiveness(),
+            objects,
+        );
     }
 
-    (lighting * hit_object.get_color()).normalize_max()
+    lighting.normalize_max()
+}
+
+fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
+    direction - normal * (2.0 * direction.dot(&normal))
 }
 
 pub fn trace_ray(
@@ -139,7 +151,21 @@ pub fn trace_ray(
 
     match find_closest_hit(ray, objects) {
         Some(hit) => {
-            compute_lighting(hit.point, hit.normal, hit.object, lights, objects).normalize_max()
+            let view_dir = -ray.direction;
+            let local_color =
+                compute_lighting(hit.point, hit.normal, view_dir, &hit.object, lights, objects);
+            let reflectiveness = hit.object.get_reflectiveness();
+
+            if reflectiveness <= 0.0 {
+                return local_color.normalize_max();
+            }
+
+            let reflected_direction = reflect(ray.direction, hit.normal).normalize();
+            let reflected_ray = Ray::new(hit.point + hit.normal * EPSILON, reflected_direction);
+            let reflected_color = trace_ray(&reflected_ray, lights, objects, depth + 1);
+
+            (local_color * (1.0 - reflectiveness) + reflected_color * reflectiveness)
+                .normalize_max()
         }
         None => {
             let t = 0.5 * (ray.direction.z + 1.0);
@@ -389,5 +415,16 @@ mod tests {
 
         assert!(top_ray.direction.z > 0.0);
         assert!(bottom_ray.direction.z < 0.0);
+    }
+
+    #[test]
+    fn reflect_flips_toward_surface_normal() {
+        let direction = Vec3::new(1.0, -1.0, 0.0).normalize();
+        let normal = Vec3::new(0.0, 1.0, 0.0);
+        let reflected = reflect(direction, normal);
+
+        assert!((reflected.x - direction.x).abs() < 1e-12);
+        assert!((reflected.y + direction.y).abs() < 1e-12);
+        assert!(reflected.z.abs() < 1e-12);
     }
 }
