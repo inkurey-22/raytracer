@@ -14,6 +14,9 @@ pub struct ObjectBuilder {
     apex: Vec3,
     limited: bool,
     reflectiveness: f64,
+    v0: Vec3,
+    v1: Vec3,
+    v2: Vec3,
 }
 
 impl ObjectBuilder {
@@ -27,6 +30,9 @@ impl ObjectBuilder {
             apex: Vec3::new(0.0, 0.0, 0.0),
             limited: false,
             reflectiveness: 0.0,
+            v0: Vec3::new(0.0, 0.0, 0.0),
+            v1: Vec3::new(0.0, 0.0, 0.0),
+            v2: Vec3::new(0.0, 0.0, 0.0),
         }
     }
 
@@ -63,6 +69,15 @@ impl ObjectBuilder {
                     self.orientation = get_orientation(value)?;
                 }
             },
+            "v0" | "vertex0" => {
+                self.v0 = get_vec3(value)?;
+            }
+            "v1" | "vertex1" => {
+                self.v1 = get_vec3(value)?;
+            }
+            "v2" | "vertex2" => {
+                self.v2 = get_vec3(value)?;
+            }
 
             _ => {
                 return Err(config::ConfigError::Message(format!(
@@ -104,6 +119,13 @@ impl ObjectBuilder {
                 color: self.color,
                 point: self.position,
                 normal: self.orientation.into_vec3(1.0),
+                reflectiveness: self.reflectiveness,
+            })),
+            "triangle" => Ok(object_interface::IObject::Triangle(triangle::Triangle {
+                color: self.color,
+                v0: self.v0,
+                v1: self.v1,
+                v2: self.v2,
                 reflectiveness: self.reflectiveness,
             })),
             other => Err(config::ConfigError::Message(format!(
