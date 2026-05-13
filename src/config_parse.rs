@@ -50,7 +50,17 @@ pub fn load_scene(config_path: &str) -> Result<SceneConfig, config::ConfigError>
                             object_type, e
                         )));
                     }
-                    Ok(obj) => objects.push(obj),
+                    Ok(obj) => {
+                        if let object_interface::IObject::ObjFile(obj_file) = obj {
+                            if let Some(triangles) = obj_file.split_into_triangles() {
+                                for triangle in triangles {
+                                    objects.push(object_interface::IObject::Triangle(triangle));
+                                }
+                            }
+                        } else {
+                            objects.push(obj);
+                        }
+                    }
                 }
             }
         }

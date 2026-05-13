@@ -1,0 +1,23 @@
+[render]
+width = 1000
+height = 1000
+
+[camera]
+fov = 60.0
+position = { depth = 4.0, right = 0.0, up = 0.0 }
+direction = { depth = -1.0, right = 0.0, up = 0.0 }
+
+[[lights.directional]]
+direction = { depth = 0, right = 0, up = -1.0 }
+color = { r = 255, g = 200, b = 180 }
+intensity = 1.5
+
+[[lights.ambiant]]
+color = { r = 255, g = 255, b = 255 }
+intensity = 1.15
+
+[[objects.obj_file]]
+path = "configs/assets/cube.obj"
+position = { depth = 0.0, right = 0.0, up = 0.0 }
+orientation = { p = 45.0, y = 45.0, r = 45.0 }
+reflectiveness = 0
