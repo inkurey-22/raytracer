@@ -132,6 +132,8 @@ impl ObjectBuilder {
                 position: self.position,
                 size: self.radius,
                 level: self.level,
+                reflectiveness: self.reflectiveness,
+            })),
             "triangle" => Ok(object_interface::IObject::Triangle(triangle::Triangle {
                 color: self.color,
                 v0: self.v0,
