@@ -62,3 +62,10 @@ radius = 0.5
 normal = { depth = 0.0, right = 0.0, up = 1.0 }
 limited = true
 color = { r = 50, g = 200, b = 200 }
+
+[[objects.menger]]
+position = { depth = 0.0, right = 0.0, up = 1.0 }
+size = 2.0
+level = 4
+color = { r = 200, g = 100, b = 255 }
+reflectiveness = 0

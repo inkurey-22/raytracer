@@ -81,12 +81,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
+name = "menger"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "object_interface"
 version = "0.1.0"
 dependencies = [
  "color",
  "cone",
  "cylinder",
+ "menger",
  "plane",
  "ray",
  "sphere",
@@ -161,6 +171,7 @@ dependencies = [
  "cylinder",
  "directional_light",
  "light_interface",
+ "menger",
  "object_interface",
  "omni_light",
  "orientation",
