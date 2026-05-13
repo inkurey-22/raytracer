@@ -5,6 +5,7 @@ use plane::Plane;
 use ray::{HitRecord, Ray};
 use sphere::Sphere;
 use menger::Menger;
+use triangle::Triangle;
 
 #[derive(Debug, Clone)]
 pub enum IObject {
@@ -13,6 +14,7 @@ pub enum IObject {
     Cylinder(Cylinder),
     Cone(Cone),
     Menger(Menger),
+    Triangle(Triangle),
 }
 
 impl IObject {
@@ -23,6 +25,7 @@ impl IObject {
             IObject::Cylinder(cylinder) => cylinder.intersect(ray, t_min),
             IObject::Cone(cone) => cone.intersect(ray, t_min),
             IObject::Menger(m) => m.intersect(ray, t_min),
+            IObject::Triangle(triangle) => triangle.intersect(ray, t_min),
         }
     }
 
@@ -33,6 +36,7 @@ impl IObject {
             IObject::Cylinder(cylinder) => cylinder.color,
             IObject::Cone(cone) => cone.color,
             IObject::Menger(m) => m.color,
+            IObject::Triangle(triangle) => triangle.color,
         }
     }
 
@@ -43,6 +47,7 @@ impl IObject {
             IObject::Cylinder(cylinder) => cylinder.reflectiveness,
             IObject::Cone(cone) => cone.reflectiveness,
             IObject::Menger(m) => m.reflectiveness,
+            IObject::Triangle(triangle) => triangle.reflectiveness,
         }
     }
 }
@@ -55,6 +60,7 @@ impl std::fmt::Display for IObject {
             IObject::Cylinder(cylinder) => write!(f, "{}", cylinder),
             IObject::Cone(cone) => write!(f, "{}", cone),
             IObject::Menger(m) => write!(f, "{}", m),
+            IObject::Triangle(triangle) => write!(f, "{}", triangle),
         }
     }
 }

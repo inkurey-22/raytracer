@@ -69,3 +69,10 @@ size = 2.0
 level = 4
 color = { r = 200, g = 100, b = 255 }
 reflectiveness = 0
+
+[[objects.triangle]]
+v0 = { depth = 10.0, right = -4.0, up = -2.0 }
+v1 = { depth = 10.0, right = 4.0, up = -2.0 }
+v2 = { depth = 10.0, right = 0.0, up = 6.0 }
+color = { r = 200, g = 200, b = 200 }
+reflectiveness = 90

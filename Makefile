@@ -13,6 +13,8 @@ CRATE_DIRS = crates/vec3 \
 			 crates/lights/omni_light \
 			 crates/lights/directional_light \
 
+$(NAME): all
+
 all:
 	cargo build --release
 	cp target/release/$(NAME) .

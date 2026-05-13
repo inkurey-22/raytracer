@@ -15,3 +15,4 @@ ray = { path = "../../ray" }
 color = { path = "../../color" }
 cone = { path = "../cone" }
 menger = { path = "../menger" }
+triangle = { path = "../triangle" }
