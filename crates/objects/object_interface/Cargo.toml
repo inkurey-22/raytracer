@@ -14,3 +14,4 @@ cylinder = { path = "../cylinder" }
 ray = { path = "../../ray" }
 color = { path = "../../color" }
 cone = { path = "../cone" }
+triangle = { path = "../triangle" }
