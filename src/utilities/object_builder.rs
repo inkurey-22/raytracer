@@ -14,6 +14,7 @@ pub struct ObjectBuilder {
     apex: Vec3,
     limited: bool,
     reflectiveness: f64,
+    level: usize,
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
@@ -30,6 +31,7 @@ impl ObjectBuilder {
             apex: Vec3::new(0.0, 0.0, 0.0),
             limited: false,
             reflectiveness: 0.0,
+            level: 0,
             v0: Vec3::new(0.0, 0.0, 0.0),
             v1: Vec3::new(0.0, 0.0, 0.0),
             v2: Vec3::new(0.0, 0.0, 0.0),
@@ -48,7 +50,7 @@ impl ObjectBuilder {
             "position" => {
                 self.position = get_vec3(value)?;
             }
-            "radius" => {
+            "radius" | "size" => {
                 self.radius = get_f64(value)?;
             }
             "angle" => {
@@ -62,6 +64,10 @@ impl ObjectBuilder {
             }
             "reflectiveness" | "reflectivity" | "reflective" => {
                 self.reflectiveness = get_percentage(value)?;
+            }
+            "level" => {
+                // level is an integer but parsed as number
+                self.level = get_f64(value)? as usize;
             }
             "normal" | "orientation" | "direction" => match get_vec3(value.clone()) {
                 Ok(vec) => self.orientation = vec.into_orientation(),
@@ -119,6 +125,13 @@ impl ObjectBuilder {
                 color: self.color,
                 point: self.position,
                 normal: self.orientation.into_vec3(1.0),
+                reflectiveness: self.reflectiveness,
+            })),
+            "menger" => Ok(object_interface::IObject::Menger(menger::Menger {
+                color: self.color,
+                position: self.position,
+                size: self.radius,
+                level: self.level,
                 reflectiveness: self.reflectiveness,
             })),
             "triangle" => Ok(object_interface::IObject::Triangle(triangle::Triangle {

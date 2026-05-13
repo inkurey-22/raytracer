@@ -1,0 +1,13 @@
+[package]
+name = "menger"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "menger"
+path = "src/lib.rs"
+
+[dependencies]
+vec3 = { path = "../../vec3" }
+color = { path = "../../color" }
+ray = { path = "../../ray" }

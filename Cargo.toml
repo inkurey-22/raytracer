@@ -19,4 +19,5 @@ plane = { path = "crates/objects/plane" }
 sphere = { path = "crates/objects/sphere" }
 cylinder = { path = "crates/objects/cylinder" }
 cone = { path = "crates/objects/cone" }
+menger = { path = "crates/objects/menger" }
 triangle = { path = "crates/objects/triangle" }
