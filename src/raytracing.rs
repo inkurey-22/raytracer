@@ -152,8 +152,14 @@ pub fn trace_ray(
     match find_closest_hit(ray, objects) {
         Some(hit) => {
             let view_dir = -ray.direction;
-            let local_color =
-                compute_lighting(hit.point, hit.normal, view_dir, &hit.object, lights, objects);
+            let local_color = compute_lighting(
+                hit.point,
+                hit.normal,
+                view_dir,
+                &hit.object,
+                lights,
+                objects,
+            );
             let reflectiveness = hit.object.get_reflectiveness();
 
             if reflectiveness <= 0.0 {
