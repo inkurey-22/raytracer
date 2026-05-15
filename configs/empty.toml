@@ -1,0 +1,8 @@
+[render]
+width = 1920
+height = 1080
+
+[camera]
+fov = 60.0
+position = { depth = -5.0, right = 0.0, up = 0.0 }
+direction = { depth = 1.0, right = 0.0, up = 0.0 }

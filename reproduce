@@ -1,0 +1,14 @@
+#! /bin/env bash
+
+make
+
+export CONFIG_LIST="configs/empty.toml configs/importer.toml configs/showcase.toml config/example.toml"
+
+echo "" > output/log.txt
+
+for config in $CONFIG_LIST; do
+    echo "$config"
+    echo -n "$config" >> output/log.txt
+    time (./raytracer "$config" -o "output/$(basename "$config" .toml).ppm" > /dev/null;) >> output/log.txt 2>&1
+    echo "" >> output/log.txt
+done

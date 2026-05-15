@@ -1,0 +1,117 @@
+[[objects.sphere]]
+position = { depth = -3.0, right = -3.0, up = 0.0 }
+radius = 0.5
+color = { r = 200, g = 0, b = 0 }
+
+[[objects.cylinder]]
+position = { depth = -1.5, right = -3.0, up = -0.5 }
+radius = 0.5
+normal = { depth = 0.0, right = 0.0, up = 1.0 }
+limited = true
+color = { r = 0, g = 200, b = 0 }
+
+[[objects.cone]]
+apex = { depth = 0.0, right = -3.0, up = 0.5 }
+normal = { depth = 0.0, right = 0.0, up = -1.0 }
+limited = true
+angle = 0.4
+color = { r = 0, g = 0, b = 200 }
+
+[[objects.triangle]]
+v0 = { depth = 1.5, right = -2.5, up = 0.0 }
+v1 = { depth = 2.0, right = -3.0, up = 1.0 }
+v2 = { depth = 1.0, right = -3.5, up = -1.0 }
+color = { r = 0, g = 200, b = 200 }
+
+[[objects.menger]]
+position = { depth = 3.0, right = -3.0, up = 0.5 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+size = 1.0
+level = 3
+color = { r = 200, g = 200, b = 200 }
+
+
+[[objects.sphere]]
+position = { depth = 3.0, right = -1.5, up = 0.0 }
+radius = 0.5
+color = { r = 200, g = 0, b = 0 }
+reflectiveness = 50
+
+[[objects.cylinder]]
+position = { depth = 1.5, right = -1.5, up = -0.5 }
+radius = 0.5
+normal = { depth = 0.0, right = 0.0, up = 1.0 }
+limited = true
+color = { r = 0, g = 200, b = 0 }
+reflectiveness = 50
+
+[[objects.cone]]
+apex = { depth = 0.0, right = -1.5, up = 0.5 }
+normal = { depth = 0.0, right = 0.0, up = -1.0 }
+limited = true
+angle = 0.4
+color = { r = 0, g = 0, b = 200 }
+reflectiveness = 50
+
+[[objects.triangle]]
+v0 = { depth = -1.5, right = -1.0, up = 0.0 }
+v1 = { depth = -2.0, right = -1.5, up = 1.0 }
+v2 = { depth = -1.0, right = -2.0, up = -1.0 }
+color = { r = 0, g = 200, b = 200 }
+reflectiveness = 50
+
+[[objects.menger]]
+position = { depth = -3.0, right = -1.5, up = 0.5 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+size = 1.0
+level = 3
+color = { r = 200, g = 200, b = 200 }
+reflectiveness = 50
+
+
+[[objects.sphere]]
+position = { depth = -3.0, right = 0.0, up = 0.0 }
+radius = 0.5
+color = { r = 200, g = 0, b = 0 }
+reflectiveness = 0
+transparency = 85
+refractive_index = 1.5
+
+[[objects.cylinder]]
+position = { depth = -1.5, right = 0.0, up = -0.5 }
+radius = 0.5
+normal = { depth = 0.0, right = 0.0, up = 1.0 }
+limited = true
+color = { r = 0, g = 200, b = 0 }
+reflectiveness = 0
+transparency = 85
+refractive_index = 1.5
+
+[[objects.cone]]
+apex = { depth = 0.0, right = 0.0, up = 0.5 }
+normal = { depth = 0.0, right = 0.0, up = -1.0 }
+limited = true
+angle = 0.4
+color = { r = 0, g = 0, b = 200 }
+reflectiveness = 0
+transparency = 85
+refractive_index = 1.5
+
+[[objects.triangle]]
+v0 = { depth = 1.5, right = 0.5, up = 0.0 }
+v1 = { depth = 2.0, right = 0.0, up = 1.0 }
+v2 = { depth = 1.0, right = -0.5, up = -1.0 }
+color = { r = 0, g = 200, b = 200 }
+reflectiveness = 0
+transparency = 85
+refractive_index = 1.5
+
+[[objects.menger]]
+position = { depth = 3.0, right = 0.0, up = 0.5 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+size = 1.0
+level = 1
+color = { r = 200, g = 200, b = 200 }
+reflectiveness = 0
+transparency = 85
+refractive_index = 1.5

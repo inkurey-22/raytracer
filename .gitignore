@@ -1,5 +1,4 @@
 target
 raytracer
-*.ppm
-*.png
+/*.ppm
 config

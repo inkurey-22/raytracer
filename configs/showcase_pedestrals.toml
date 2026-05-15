@@ -1,0 +1,153 @@
+[[objects.cuboid]]
+position = { depth = 3.0, right = 3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 3.0, right = 1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 3.0, right = 0.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 3.0, right = -1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 3.0, right = -3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+
+[[objects.cuboid]]
+position = { depth = 1.5, right = 3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 1.5, right = 1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 1.5, right = 0.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 1.5, right = -1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 1.5, right = -3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+
+[[objects.cuboid]]
+position = { depth = 0.0, right = 3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 0.0, right = 1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 0.0, right = 0.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 0.0, right = -1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = 0.0, right = -3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+
+[[objects.cuboid]]
+position = { depth = -1.5, right = 3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -1.5, right = 1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -1.5, right = 0.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -1.5, right = -1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -1.5, right = -3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+
+[[objects.cuboid]]
+position = { depth = -3.0, right = 3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -3.0, right = 1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -3.0, right = 0.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -3.0, right = -1.5, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
+
+[[objects.cuboid]]
+position = { depth = -3.0, right = -3.0, up = -1.0 }
+orientation = { depth = 0.0, right = 0.0, up = 1.0 }
+dimensions = { depth = 1.0, right = 1.0, up = 1.0 }
+color = { r = 255, g = 255, b = 255 }
