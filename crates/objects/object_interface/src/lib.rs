@@ -1,5 +1,6 @@
 use color::Color;
 use cone::Cone;
+use cuboid::Cuboid;
 use cylinder::Cylinder;
 use menger::Menger;
 use obj_file::ObjFile;
@@ -16,6 +17,7 @@ pub enum IObject {
     Cone(Cone),
     Menger(Menger),
     Triangle(Triangle),
+    Cuboid(Cuboid),
     ObjFile(ObjFile),
 }
 
@@ -28,6 +30,7 @@ impl IObject {
             IObject::Cone(cone) => cone.intersect(ray, t_min),
             IObject::Menger(m) => m.intersect(ray, t_min),
             IObject::Triangle(triangle) => triangle.intersect(ray, t_min),
+            IObject::Cuboid(cuboid) => cuboid.intersect(ray, t_min),
             IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
@@ -40,6 +43,7 @@ impl IObject {
             IObject::Cone(cone) => cone.color,
             IObject::Menger(m) => m.color,
             IObject::Triangle(triangle) => triangle.color,
+            IObject::Cuboid(cuboid) => cuboid.color,
             IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
@@ -52,6 +56,7 @@ impl IObject {
             IObject::Cone(cone) => cone.reflectiveness,
             IObject::Menger(m) => m.reflectiveness,
             IObject::Triangle(triangle) => triangle.reflectiveness,
+            IObject::Cuboid(cuboid) => cuboid.reflectiveness,
             IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
@@ -64,6 +69,7 @@ impl IObject {
             IObject::Cone(cone) => cone.transparency,
             IObject::Menger(m) => m.transparency,
             IObject::Triangle(triangle) => triangle.transparency,
+            IObject::Cuboid(cuboid) => cuboid.transparency,
             IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
@@ -76,6 +82,7 @@ impl IObject {
             IObject::Cone(cone) => cone.refractive_index,
             IObject::Menger(m) => m.refractive_index,
             IObject::Triangle(triangle) => triangle.refractive_index,
+            IObject::Cuboid(cuboid) => cuboid.refractive_index,
             IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
@@ -99,6 +106,7 @@ impl std::fmt::Display for IObject {
             IObject::Cone(cone) => write!(f, "{}", cone),
             IObject::Menger(m) => write!(f, "{}", m),
             IObject::Triangle(triangle) => write!(f, "{}", triangle),
+            IObject::Cuboid(cuboid) => write!(f, "{}", cuboid),
             IObject::ObjFile(obj_file) => write!(f, "{}", obj_file),
         }
     }

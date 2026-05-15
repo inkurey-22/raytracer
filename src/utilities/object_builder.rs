@@ -20,6 +20,7 @@ pub struct ObjectBuilder {
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
+    dimensions: Vec3,
     path: String,
 }
 
@@ -40,6 +41,7 @@ impl ObjectBuilder {
             v0: Vec3::new(0.0, 0.0, 0.0),
             v1: Vec3::new(0.0, 0.0, 0.0),
             v2: Vec3::new(0.0, 0.0, 0.0),
+            dimensions: Vec3::new(1.0, 1.0, 1.0),
             path: String::new(),
         }
     }
@@ -95,6 +97,9 @@ impl ObjectBuilder {
             }
             "v2" | "vertex2" => {
                 self.v2 = get_vec3(value)?;
+            }
+            "dimensions" | "dimension" => {
+                self.dimensions = get_vec3(value)?;
             }
             "path" => {
                 self.path = get_string(value)?;
@@ -164,6 +169,15 @@ impl ObjectBuilder {
                 v0: self.v0,
                 v1: self.v1,
                 v2: self.v2,
+                reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
+            })),
+            "cuboid" => Ok(object_interface::IObject::Cuboid(cuboid::Cuboid {
+                color: self.color,
+                position: self.position,
+                dimensions: self.dimensions,
+                orientation: self.orientation.into_vec3(1.0),
                 reflectiveness: self.reflectiveness,
                 transparency: self.transparency,
                 refractive_index: self.refractive_index,
