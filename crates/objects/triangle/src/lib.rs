@@ -11,6 +11,8 @@ pub struct Triangle {
     pub v2: Vec3,
     pub color: Color,
     pub reflectiveness: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
 }
 
 impl Triangle {
@@ -61,6 +63,8 @@ impl fmt::Display for Triangle {
         writeln!(f, "      v1: {}", self.v1)?;
         writeln!(f, "      v2: {}", self.v2)?;
         writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
+        writeln!(f, "      transparency: {:.3}", self.transparency)?;
+        writeln!(f, "      refractive_index: {:.3}", self.refractive_index)?;
         writeln!(f, "      color: {}", self.color)
     }
 }

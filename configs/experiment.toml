@@ -21,3 +21,5 @@ path = "configs/assets/cube.obj"
 position = { depth = 0.0, right = 0.0, up = 0.0 }
 orientation = { p = 45.0, y = 45.0, r = 45.0 }
 reflectiveness = 0
+transparency = 85
+refractive_index = 1.5
