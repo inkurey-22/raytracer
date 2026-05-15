@@ -99,6 +99,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "obj_file"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "triangle",
+ "vec3",
+]
+
+[[package]]
 name = "object_interface"
 version = "0.1.0"
 dependencies = [
@@ -107,6 +116,7 @@ dependencies = [
  "cuboid",
  "cylinder",
  "menger",
+ "obj_file",
  "plane",
  "ray",
  "sphere",
@@ -184,6 +194,7 @@ dependencies = [
  "directional_light",
  "light_interface",
  "menger",
+ "obj_file",
  "object_interface",
  "omni_light",
  "orientation",

@@ -22,3 +22,4 @@ cone = { path = "crates/objects/cone" }
 menger = { path = "crates/objects/menger" }
 triangle = { path = "crates/objects/triangle" }
 cuboid = { path = "crates/objects/cuboid" }
+obj_file = { path = "crates/objects/obj_file" }

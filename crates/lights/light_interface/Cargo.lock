@@ -56,15 +56,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "obj_file"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "triangle",
+ "vec3",
+]
+
+[[package]]
 name = "object_interface"
 version = "0.1.0"
 dependencies = [
  "color",
  "cone",
  "cylinder",
+ "obj_file",
  "plane",
  "ray",
  "sphere",
+ "triangle",
 ]
 
 [[package]]
@@ -95,6 +106,15 @@ dependencies = [
 
 [[package]]
 name = "sphere"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "ray",
+ "vec3",
+]
+
+[[package]]
+name = "triangle"
 version = "0.1.0"
 dependencies = [
  "color",

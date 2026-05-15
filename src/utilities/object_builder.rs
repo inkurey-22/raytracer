@@ -1,5 +1,5 @@
 use crate::utilities::value_reading::{
-    get_bool, get_color, get_f64, get_orientation, get_percentage, get_vec3,
+    get_bool, get_color, get_f64, get_orientation, get_percentage, get_string, get_vec3,
 };
 use color::Color;
 use orientation::{Orientation, Vec3OrientationExt};
@@ -14,11 +14,14 @@ pub struct ObjectBuilder {
     apex: Vec3,
     limited: bool,
     reflectiveness: f64,
+    transparency: f64,
+    refractive_index: f64,
     level: usize,
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
     dimensions: Vec3,
+    path: String,
 }
 
 impl ObjectBuilder {
@@ -32,11 +35,14 @@ impl ObjectBuilder {
             apex: Vec3::new(0.0, 0.0, 0.0),
             limited: false,
             reflectiveness: 0.0,
+            transparency: 0.0,
+            refractive_index: 1.5,
             level: 0,
             v0: Vec3::new(0.0, 0.0, 0.0),
             v1: Vec3::new(0.0, 0.0, 0.0),
             v2: Vec3::new(0.0, 0.0, 0.0),
             dimensions: Vec3::new(1.0, 1.0, 1.0),
+            path: String::new(),
         }
     }
 
@@ -67,6 +73,12 @@ impl ObjectBuilder {
             "reflectiveness" | "reflectivity" | "reflective" => {
                 self.reflectiveness = get_percentage(value)?;
             }
+            "transparency" => {
+                self.transparency = get_percentage(value)?;
+            }
+            "ior" | "refractive_index" | "index_of_refraction" => {
+                self.refractive_index = get_f64(value)?;
+            }
             "level" => {
                 // level is an integer but parsed as number
                 self.level = get_f64(value)? as usize;
@@ -88,6 +100,8 @@ impl ObjectBuilder {
             }
             "dimensions" | "dimension" => {
                 self.dimensions = get_vec3(value)?;
+            "path" => {
+                self.path = get_string(value)?;
             }
 
             _ => {
@@ -109,6 +123,8 @@ impl ObjectBuilder {
                 center: self.position,
                 radius: self.radius,
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "cylinder" => Ok(object_interface::IObject::Cylinder(cylinder::Cylinder {
                 color: self.color,
@@ -117,6 +133,8 @@ impl ObjectBuilder {
                 normal: self.orientation.into_vec3(1.0),
                 limited: self.limited,
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "cone" => Ok(object_interface::IObject::Cone(cone::Cone {
                 color: self.color,
@@ -125,12 +143,16 @@ impl ObjectBuilder {
                 normal: self.orientation.into_vec3(1.0),
                 limited: self.limited,
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "plane" => Ok(object_interface::IObject::Plane(plane::Plane {
                 color: self.color,
                 point: self.position,
                 normal: self.orientation.into_vec3(1.0),
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "menger" => Ok(object_interface::IObject::Menger(menger::Menger {
                 color: self.color,
@@ -138,6 +160,8 @@ impl ObjectBuilder {
                 size: self.radius,
                 level: self.level,
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "triangle" => Ok(object_interface::IObject::Triangle(triangle::Triangle {
                 color: self.color,
@@ -145,6 +169,8 @@ impl ObjectBuilder {
                 v1: self.v1,
                 v2: self.v2,
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "cuboid" => Ok(object_interface::IObject::Cuboid(cuboid::Cuboid {
                 color: self.color,
@@ -153,6 +179,15 @@ impl ObjectBuilder {
                 orientation: self.orientation.into_vec3(1.0),
                 reflectiveness: self.reflectiveness,
             })),
+            "obj_file" => Ok(object_interface::IObject::ObjFile(obj_file::ObjFile {
+                path: self.path.clone(),
+                center: self.position,
+                orientation: self.orientation.into_vec3(1.0),
+                reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
+            })),
+
             other => Err(config::ConfigError::Message(format!(
                 "Unknown object type: {other}"
             ))),

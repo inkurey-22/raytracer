@@ -12,6 +12,8 @@ pub struct Cylinder {
     pub normal: Vec3,
     pub limited: bool,
     pub reflectiveness: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
 }
 
 impl fmt::Display for Cylinder {
@@ -22,6 +24,8 @@ impl fmt::Display for Cylinder {
         writeln!(f, "      limited: {}", self.limited)?;
         writeln!(f, "      normal: {}", self.normal)?;
         writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
+        writeln!(f, "      transparency: {:.3}", self.transparency)?;
+        writeln!(f, "      refractive_index: {:.3}", self.refractive_index)?;
         writeln!(f, "      color: {}", self.color)
     }
 }

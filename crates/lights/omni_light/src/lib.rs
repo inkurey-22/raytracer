@@ -19,6 +19,9 @@ fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
 
 fn is_obstructed(ray: &Ray, objects: &[object_interface::IObject], max_distance: f64) -> bool {
     for object in objects {
+        if object.get_transparency() > 0.0 {
+            continue;
+        }
         if let Some(hit) = object.intersect(ray, EPSILON) {
             if hit.t < max_distance {
                 return true;

@@ -27,6 +27,9 @@ impl Default for DirectionalLight {
 
 fn is_obstructed(ray: &Ray, objects: &[object_interface::IObject]) -> bool {
     for object in objects {
+        if object.get_transparency() > 0.0 {
+            continue;
+        }
         if object.intersect(ray, EPSILON).is_some() {
             return true;
         }
