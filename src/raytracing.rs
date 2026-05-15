@@ -139,6 +139,27 @@ fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
     direction - normal * (2.0 * direction.dot(&normal))
 }
 
+fn refract(direction: Vec3, normal: Vec3, eta_i: f64, eta_t: f64) -> Option<Vec3> {
+    let dir = direction.normalize();
+    let n = normal.normalize();
+    let eta = eta_i / eta_t;
+    let cos_i = (-dir).dot(&n).clamp(-1.0, 1.0);
+    let sin_t2 = eta * eta * (1.0 - cos_i * cos_i);
+
+    if sin_t2 > 1.0 {
+        return None;
+    }
+
+    let cos_t = (1.0 - sin_t2).sqrt();
+    Some((dir * eta + n * (eta * cos_i - cos_t)).normalize())
+}
+
+fn schlick(cosine: f64, eta_i: f64, eta_t: f64) -> f64 {
+    let mut r0 = (eta_i - eta_t) / (eta_i + eta_t);
+    r0 *= r0;
+    r0 + (1.0 - r0) * (1.0 - cosine.clamp(0.0, 1.0)).powi(5)
+}
+
 pub fn trace_ray(
     ray: &Ray,
     lights: &[light_interface::ILight],
@@ -160,17 +181,65 @@ pub fn trace_ray(
                 lights,
                 objects,
             );
-            let reflectiveness = hit.object.get_reflectiveness();
+            let reflectiveness = hit.object.get_reflectiveness().clamp(0.0, 1.0);
+            let transparency = hit.object.get_transparency().clamp(0.0, 1.0);
 
-            if reflectiveness <= 0.0 {
+            if reflectiveness <= 0.0 && transparency <= 0.0 {
                 return local_color.normalize_max();
             }
 
-            let reflected_direction = reflect(ray.direction, hit.normal).normalize();
-            let reflected_ray = Ray::new(hit.point + hit.normal * EPSILON, reflected_direction);
+            let mut shading_normal = hit.normal.normalize();
+            let surface_normal = shading_normal;
+            let mut eta_i = 1.0;
+            let mut eta_t = hit.object.get_refractive_index().max(EPSILON);
+            let entering = ray.direction.dot(&shading_normal) < 0.0;
+
+            if !entering {
+                shading_normal = -shading_normal;
+                eta_i = hit.object.get_refractive_index().max(EPSILON);
+                eta_t = 1.0;
+            }
+
+            let reflected_direction = reflect(ray.direction, shading_normal).normalize();
+            let reflected_ray = Ray::new(hit.point + shading_normal * EPSILON, reflected_direction);
             let reflected_color = trace_ray(&reflected_ray, lights, objects, depth + 1);
 
-            (local_color * (1.0 - reflectiveness) + reflected_color * reflectiveness)
+            let fresnel = if transparency > 0.0 {
+                schlick((-ray.direction).dot(&shading_normal).abs(), eta_i, eta_t)
+            } else {
+                0.0
+            };
+
+            let reflection_weight = (reflectiveness + fresnel * transparency).max(0.0);
+            let transmission_weight = ((1.0 - fresnel) * transparency).max(0.0);
+            let local_weight = (1.0 - reflectiveness - transparency).max(0.0);
+
+            let refracted_color = if transmission_weight > 0.0 {
+                refract(ray.direction, shading_normal, eta_i, eta_t)
+                    .map(|direction| {
+                        let bias = if entering {
+                            -surface_normal * EPSILON
+                        } else {
+                            surface_normal * EPSILON
+                        };
+                        let refracted_ray = Ray::new(hit.point + bias, direction);
+                        trace_ray(&refracted_ray, lights, objects, depth + 1)
+                    })
+                    .unwrap_or_else(|| reflected_color)
+            } else {
+                Color::new(0.0, 0.0, 0.0)
+            };
+
+            let total_weight = local_weight + reflection_weight + transmission_weight;
+            let scale = if total_weight > 1.0 {
+                1.0 / total_weight
+            } else {
+                1.0
+            };
+
+            (local_color * (local_weight * scale)
+                + reflected_color * (reflection_weight * scale)
+                + refracted_color * (transmission_weight * scale))
                 .normalize_max()
         }
         None => {
@@ -432,5 +501,24 @@ mod tests {
         assert!((reflected.x - direction.x).abs() < 1e-12);
         assert!((reflected.y + direction.y).abs() < 1e-12);
         assert!(reflected.z.abs() < 1e-12);
+    }
+
+    #[test]
+    fn refract_bends_toward_the_normal_when_entering() {
+        let direction = Vec3::new(1.0, -1.0, 0.0).normalize();
+        let normal = Vec3::new(0.0, 1.0, 0.0);
+        let refracted = refract(direction, normal, 1.0, 1.5).unwrap();
+
+        assert!(refracted.x.abs() < direction.x.abs());
+        assert!(refracted.y < 0.0);
+        assert!(refracted.z.abs() < 1e-12);
+    }
+
+    #[test]
+    fn refract_returns_none_for_total_internal_reflection() {
+        let direction = Vec3::new(0.9, -0.1, 0.0).normalize();
+        let normal = Vec3::new(0.0, 1.0, 0.0);
+
+        assert!(refract(direction, normal, 1.5, 1.0).is_none());
     }
 }

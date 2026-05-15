@@ -1,11 +1,11 @@
 use color::Color;
 use cone::Cone;
 use cylinder::Cylinder;
+use menger::Menger;
 use obj_file::ObjFile;
 use plane::Plane;
 use ray::{HitRecord, Ray};
 use sphere::Sphere;
-use menger::Menger;
 use triangle::Triangle;
 
 #[derive(Debug, Clone)]
@@ -52,6 +52,30 @@ impl IObject {
             IObject::Cone(cone) => cone.reflectiveness,
             IObject::Menger(m) => m.reflectiveness,
             IObject::Triangle(triangle) => triangle.reflectiveness,
+            IObject::ObjFile(_) => panic!("should not be reached"),
+        }
+    }
+
+    pub fn get_transparency(&self) -> f64 {
+        match self {
+            IObject::Plane(plane) => plane.transparency,
+            IObject::Sphere(sphere) => sphere.transparency,
+            IObject::Cylinder(cylinder) => cylinder.transparency,
+            IObject::Cone(cone) => cone.transparency,
+            IObject::Menger(m) => m.transparency,
+            IObject::Triangle(triangle) => triangle.transparency,
+            IObject::ObjFile(_) => panic!("should not be reached"),
+        }
+    }
+
+    pub fn get_refractive_index(&self) -> f64 {
+        match self {
+            IObject::Plane(plane) => plane.refractive_index,
+            IObject::Sphere(sphere) => sphere.refractive_index,
+            IObject::Cylinder(cylinder) => cylinder.refractive_index,
+            IObject::Cone(cone) => cone.refractive_index,
+            IObject::Menger(m) => m.refractive_index,
+            IObject::Triangle(triangle) => triangle.refractive_index,
             IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }

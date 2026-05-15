@@ -11,6 +11,8 @@ pub struct Menger {
     pub size: f64,
     pub level: usize,
     pub reflectiveness: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
 }
 
 impl fmt::Display for Menger {
@@ -20,6 +22,8 @@ impl fmt::Display for Menger {
         writeln!(f, "      size: {:.3}", self.size)?;
         writeln!(f, "      level: {}", self.level)?;
         writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
+        writeln!(f, "      transparency: {:.3}", self.transparency)?;
+        writeln!(f, "      refractive_index: {:.3}", self.refractive_index)?;
         writeln!(f, "      color: {}", self.color)
     }
 }
@@ -76,7 +80,9 @@ impl Menger {
                     );
                     let sub_center = center + offset;
 
-                    if let Some(hit) = self.intersect_recursive(sub_center, new_size, level - 1, ray, epsilon) {
+                    if let Some(hit) =
+                        self.intersect_recursive(sub_center, new_size, level - 1, ray, epsilon)
+                    {
                         if hit.t < closest_t {
                             closest_t = hit.t;
                             closest = Some(hit);
@@ -95,7 +101,9 @@ fn ray_aabb_intersect(ray: &Ray, min: Vec3, max: Vec3, epsilon: f64) -> Option<f
         let inv_dx = 1.0 / ray.direction.x;
         let mut t1 = (min.x - ray.origin.x) * inv_dx;
         let mut t2 = (max.x - ray.origin.x) * inv_dx;
-        if t1 > t2 { std::mem::swap(&mut t1, &mut t2); }
+        if t1 > t2 {
+            std::mem::swap(&mut t1, &mut t2);
+        }
         (t1, t2)
     };
 
@@ -103,7 +111,9 @@ fn ray_aabb_intersect(ray: &Ray, min: Vec3, max: Vec3, epsilon: f64) -> Option<f
         let inv_dy = 1.0 / ray.direction.y;
         let mut t1 = (min.y - ray.origin.y) * inv_dy;
         let mut t2 = (max.y - ray.origin.y) * inv_dy;
-        if t1 > t2 { std::mem::swap(&mut t1, &mut t2); }
+        if t1 > t2 {
+            std::mem::swap(&mut t1, &mut t2);
+        }
         (t1, t2)
     };
 
@@ -111,14 +121,20 @@ fn ray_aabb_intersect(ray: &Ray, min: Vec3, max: Vec3, epsilon: f64) -> Option<f
         return None;
     }
 
-    if tymin > tmin { tmin = tymin; }
-    if tymax < tmax { tmax = tymax; }
+    if tymin > tmin {
+        tmin = tymin;
+    }
+    if tymax < tmax {
+        tmax = tymax;
+    }
 
     let (tzmin, tzmax) = {
         let inv_dz = 1.0 / ray.direction.z;
         let mut t1 = (min.z - ray.origin.z) * inv_dz;
         let mut t2 = (max.z - ray.origin.z) * inv_dz;
-        if t1 > t2 { std::mem::swap(&mut t1, &mut t2); }
+        if t1 > t2 {
+            std::mem::swap(&mut t1, &mut t2);
+        }
         (t1, t2)
     };
 
@@ -126,8 +142,12 @@ fn ray_aabb_intersect(ray: &Ray, min: Vec3, max: Vec3, epsilon: f64) -> Option<f
         return None;
     }
 
-    if tzmin > tmin { tmin = tzmin; }
-    if tzmax < tmax { tmax = tzmax; }
+    if tzmin > tmin {
+        tmin = tzmin;
+    }
+    if tzmax < tmax {
+        tmax = tzmax;
+    }
 
     let t_candidate = if tmin > epsilon { tmin } else { tmax };
     if t_candidate > epsilon {
@@ -145,7 +165,12 @@ fn aabb_normal(point: &Vec3, min: &Vec3, max: &Vec3, _epsilon: f64) -> Vec3 {
     let dz_min = (point.z - min.z).abs();
     let dz_max = (point.z - max.z).abs();
 
-    let min_dist = dx_min.min(dx_max).min(dy_min).min(dy_max).min(dz_min).min(dz_max);
+    let min_dist = dx_min
+        .min(dx_max)
+        .min(dy_min)
+        .min(dy_max)
+        .min(dz_min)
+        .min(dz_max);
 
     if (dx_min - min_dist).abs() < 1e-9 {
         return Vec3::new(-1.0, 0.0, 0.0);

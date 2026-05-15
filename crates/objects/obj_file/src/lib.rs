@@ -11,6 +11,8 @@ pub struct ObjFile {
     pub orientation: Vec3,
     pub path: String,
     pub reflectiveness: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
 }
 
 impl ObjFile {
@@ -120,6 +122,8 @@ impl ObjFile {
                                 v2: rv0,
                                 color,
                                 reflectiveness: self.reflectiveness,
+                                transparency: self.transparency,
+                                refractive_index: self.refractive_index,
                             });
                         }
                     }
@@ -138,6 +142,8 @@ impl fmt::Display for ObjFile {
         writeln!(f, "      center: {}", self.center)?;
         writeln!(f, "      orientation: {}", self.orientation)?;
         writeln!(f, "      reflectiveness: {:.3}", self.reflectiveness)?;
+        writeln!(f, "      transparency: {:.3}", self.transparency)?;
+        writeln!(f, "      refractive_index: {:.3}", self.refractive_index)?;
         writeln!(f, "      path: {}", self.path)
     }
 }
