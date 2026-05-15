@@ -8,6 +8,8 @@ pub struct Args {
     pub height: Option<usize>,
     pub samples_per_pixel: Option<usize>,
     pub variance_threshold: Option<f64>,
+    pub server: bool,
+    pub client: Option<String>,
 }
 
 impl Args {
@@ -24,6 +26,8 @@ impl Args {
         let mut height = None;
         let mut samples_per_pixel = None;
         let mut variance_threshold = None;
+        let mut server = false;
+        let mut client = None;
 
         let mut i = 1;
         while i < args.len() {
@@ -82,6 +86,16 @@ impl Args {
                             .map_err(|_| format!("Invalid variance threshold: {}", args[i]))?,
                     );
                 }
+                "--server" => {
+                    server = true;
+                }
+                "--client" => {
+                    i += 1;
+                    if i >= args.len() {
+                        return Err(format!("{} requires a value", arg));
+                    }
+                    client = Some(args[i].clone());
+                }
                 _ => {
                     if arg.starts_with('-') {
                         return Err(format!("Unknown option: {}", arg));
@@ -97,7 +111,7 @@ impl Args {
             i += 1;
         }
 
-        if config.is_empty() {
+        if config.is_empty() && !server && client.is_none() {
             return Err("Config file is required".to_string());
         }
 
@@ -108,6 +122,8 @@ impl Args {
             height,
             samples_per_pixel,
             variance_threshold,
+            server,
+            client,
         })
     }
 
@@ -123,10 +139,14 @@ Options:
   --height <SIZE>               Image height in pixels (default: from config)
   --samples <N>                 Samples per pixel for adaptive supersampling (default: 16)
   --variance-threshold <VAL>    Variance threshold for adaptive sampling (default: 0.01)
+  --server                      Launch as main server (accepts client connections)
+  --client <IP:PORT>            Launch as client and connect to server
   -h, --help                    Show this help message
 
 Examples:
   raytracer config/simple.toml
+  raytracer --server
+  raytracer --client 127.0.0.1:25565 config/simple.toml
   raytracer config/example.toml -o render.ppm
   raytracer config/simple.toml --samples 32 --variance-threshold 0.005
   raytracer config/simple.toml --width 400 --height 300"#

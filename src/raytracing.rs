@@ -12,6 +12,7 @@ const MAX_RECURSION: i32 = 22;
 const DEFAULT_SAMPLES_PER_PIXEL: usize = 16;
 const DEFAULT_VARIANCE_THRESHOLD: f64 = 0.01;
 
+#[derive(Clone)]
 pub struct SamplingConfig {
     pub samples_per_pixel: usize,
     pub variance_threshold: f64,
@@ -373,37 +374,54 @@ fn spawn_render_thread(
     })
 }
 
-pub fn render(
+
+
+#[allow(clippy::too_many_arguments)]
+pub fn render_rows_multithreaded(
     camera: &Camera,
     width: usize,
     height: usize,
     lights: &[light_interface::ILight],
     objects: &[object_interface::IObject],
     sampling_config: SamplingConfig,
+    start_row: usize,
+    end_row: usize,
 ) -> Vec<Vec<Color>> {
     let resources = RenderResources::new(camera, width, height, lights, objects, sampling_config);
+
+    let total_rows = end_row.saturating_sub(start_row).min(height.saturating_sub(start_row));
+    if total_rows == 0 {
+        return Vec::new();
+    }
 
     let max_threads = std::thread::available_parallelism()
         .map(|n| n.get())
         .unwrap_or(4)
-        .min(height);
+        .min(total_rows)
+        .max(1);
+
+    let rows_per_thread = total_rows.div_ceil(max_threads);
     let mut handles = Vec::new();
 
-    let rows_per_thread = height.div_ceil(max_threads);
     for thread_id in 0..max_threads {
-        let start_row = thread_id * rows_per_thread;
-        let end_row = ((thread_id + 1) * rows_per_thread).min(height);
-        handles.push(spawn_render_thread(start_row, end_row, resources.clone()));
+        let s = start_row + thread_id * rows_per_thread;
+        let e = (start_row + (thread_id + 1) * rows_per_thread).min(end_row);
+        if s >= e {
+            continue;
+        }
+        handles.push(spawn_render_thread(s, e, resources.clone()));
     }
 
-    for handle in handles {
-        handle.join().unwrap();
+    for h in handles {
+        h.join().unwrap();
     }
 
-    Arc::try_unwrap(resources.image)
+    let image = Arc::try_unwrap(resources.image)
         .unwrap()
         .into_inner()
-        .unwrap()
+        .unwrap();
+
+    image[start_row..end_row].to_vec()
 }
 
 pub fn write_ppm(filename: &str, image: &[Vec<Color>]) -> std::io::Result<()> {
