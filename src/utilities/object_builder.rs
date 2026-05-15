@@ -18,6 +18,7 @@ pub struct ObjectBuilder {
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
+    dimensions: Vec3,
 }
 
 impl ObjectBuilder {
@@ -35,6 +36,7 @@ impl ObjectBuilder {
             v0: Vec3::new(0.0, 0.0, 0.0),
             v1: Vec3::new(0.0, 0.0, 0.0),
             v2: Vec3::new(0.0, 0.0, 0.0),
+            dimensions: Vec3::new(1.0, 1.0, 1.0),
         }
     }
 
@@ -83,6 +85,9 @@ impl ObjectBuilder {
             }
             "v2" | "vertex2" => {
                 self.v2 = get_vec3(value)?;
+            }
+            "dimensions" | "dimension" => {
+                self.dimensions = get_vec3(value)?;
             }
 
             _ => {
@@ -139,6 +144,13 @@ impl ObjectBuilder {
                 v0: self.v0,
                 v1: self.v1,
                 v2: self.v2,
+                reflectiveness: self.reflectiveness,
+            })),
+            "cuboid" => Ok(object_interface::IObject::Cuboid(cuboid::Cuboid {
+                color: self.color,
+                position: self.position,
+                dimensions: self.dimensions,
+                orientation: self.orientation.into_vec3(1.0),
                 reflectiveness: self.reflectiveness,
             })),
             other => Err(config::ConfigError::Message(format!(

@@ -1,10 +1,11 @@
 use color::Color;
 use cone::Cone;
+use cuboid::Cuboid;
 use cylinder::Cylinder;
+use menger::Menger;
 use plane::Plane;
 use ray::{HitRecord, Ray};
 use sphere::Sphere;
-use menger::Menger;
 use triangle::Triangle;
 
 #[derive(Debug, Clone)]
@@ -15,6 +16,7 @@ pub enum IObject {
     Cone(Cone),
     Menger(Menger),
     Triangle(Triangle),
+    Cuboid(Cuboid),
 }
 
 impl IObject {
@@ -26,6 +28,7 @@ impl IObject {
             IObject::Cone(cone) => cone.intersect(ray, t_min),
             IObject::Menger(m) => m.intersect(ray, t_min),
             IObject::Triangle(triangle) => triangle.intersect(ray, t_min),
+            IObject::Cuboid(cuboid) => cuboid.intersect(ray, t_min),
         }
     }
 
@@ -37,6 +40,7 @@ impl IObject {
             IObject::Cone(cone) => cone.color,
             IObject::Menger(m) => m.color,
             IObject::Triangle(triangle) => triangle.color,
+            IObject::Cuboid(cuboid) => cuboid.color,
         }
     }
 
@@ -48,6 +52,7 @@ impl IObject {
             IObject::Cone(cone) => cone.reflectiveness,
             IObject::Menger(m) => m.reflectiveness,
             IObject::Triangle(triangle) => triangle.reflectiveness,
+            IObject::Cuboid(cuboid) => cuboid.reflectiveness,
         }
     }
 }
@@ -61,6 +66,7 @@ impl std::fmt::Display for IObject {
             IObject::Cone(cone) => write!(f, "{}", cone),
             IObject::Menger(m) => write!(f, "{}", m),
             IObject::Triangle(triangle) => write!(f, "{}", triangle),
+            IObject::Cuboid(cuboid) => write!(f, "{}", cuboid),
         }
     }
 }

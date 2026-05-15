@@ -16,3 +16,4 @@ color = { path = "../../color" }
 cone = { path = "../cone" }
 menger = { path = "../menger" }
 triangle = { path = "../triangle" }
+cuboid = { path = "../cuboid" }
