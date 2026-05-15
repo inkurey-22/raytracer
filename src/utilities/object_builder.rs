@@ -1,5 +1,5 @@
 use crate::utilities::value_reading::{
-    get_bool, get_color, get_f64, get_orientation, get_percentage, get_vec3,
+    get_bool, get_color, get_f64, get_orientation, get_percentage, get_string, get_vec3,
 };
 use color::Color;
 use orientation::{Orientation, Vec3OrientationExt};
@@ -18,6 +18,7 @@ pub struct ObjectBuilder {
     v0: Vec3,
     v1: Vec3,
     v2: Vec3,
+    path: String,
 }
 
 impl ObjectBuilder {
@@ -35,6 +36,7 @@ impl ObjectBuilder {
             v0: Vec3::new(0.0, 0.0, 0.0),
             v1: Vec3::new(0.0, 0.0, 0.0),
             v2: Vec3::new(0.0, 0.0, 0.0),
+            path: String::new(),
         }
     }
 
@@ -83,6 +85,9 @@ impl ObjectBuilder {
             }
             "v2" | "vertex2" => {
                 self.v2 = get_vec3(value)?;
+            }
+            "path" => {
+                self.path = get_string(value)?;
             }
 
             _ => {
@@ -141,6 +146,13 @@ impl ObjectBuilder {
                 v2: self.v2,
                 reflectiveness: self.reflectiveness,
             })),
+            "obj_file" => Ok(object_interface::IObject::ObjFile(obj_file::ObjFile {
+                path: self.path.clone(),
+                center: self.position,
+                orientation: self.orientation.into_vec3(1.0),
+                reflectiveness: self.reflectiveness,
+            })),
+
             other => Err(config::ConfigError::Message(format!(
                 "Unknown object type: {other}"
             ))),

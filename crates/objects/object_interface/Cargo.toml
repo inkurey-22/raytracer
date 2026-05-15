@@ -14,5 +14,6 @@ cylinder = { path = "../cylinder" }
 ray = { path = "../../ray" }
 color = { path = "../../color" }
 cone = { path = "../cone" }
-menger = { path = "../menger" }
 triangle = { path = "../triangle" }
+obj_file = { path = "../obj_file" }
+menger = { path = "../menger" }

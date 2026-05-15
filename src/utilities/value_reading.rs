@@ -144,3 +144,9 @@ pub fn get_orientation(value: config::Value) -> Result<Orientation, config::Conf
             .map_err(|_| config::ConfigError::Message("Invalid Orientation.r".to_string()))?,
     })
 }
+
+pub fn get_string(value: config::Value) -> Result<String, config::ConfigError> {
+    value
+        .into_string()
+        .map_err(|_| config::ConfigError::Message("Expected a string value".to_string()))
+}

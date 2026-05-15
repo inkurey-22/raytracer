@@ -1,6 +1,7 @@
 use color::Color;
 use cone::Cone;
 use cylinder::Cylinder;
+use obj_file::ObjFile;
 use plane::Plane;
 use ray::{HitRecord, Ray};
 use sphere::Sphere;
@@ -15,6 +16,7 @@ pub enum IObject {
     Cone(Cone),
     Menger(Menger),
     Triangle(Triangle),
+    ObjFile(ObjFile),
 }
 
 impl IObject {
@@ -26,6 +28,7 @@ impl IObject {
             IObject::Cone(cone) => cone.intersect(ray, t_min),
             IObject::Menger(m) => m.intersect(ray, t_min),
             IObject::Triangle(triangle) => triangle.intersect(ray, t_min),
+            IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
 
@@ -37,6 +40,7 @@ impl IObject {
             IObject::Cone(cone) => cone.color,
             IObject::Menger(m) => m.color,
             IObject::Triangle(triangle) => triangle.color,
+            IObject::ObjFile(_) => panic!("should not be reached"),
         }
     }
 
@@ -48,6 +52,16 @@ impl IObject {
             IObject::Cone(cone) => cone.reflectiveness,
             IObject::Menger(m) => m.reflectiveness,
             IObject::Triangle(triangle) => triangle.reflectiveness,
+            IObject::ObjFile(_) => panic!("should not be reached"),
+        }
+    }
+
+    pub fn split_into_triangles(&self) -> Option<Vec<IObject>> {
+        match self {
+            IObject::ObjFile(obj_file) => obj_file
+                .split_into_triangles()
+                .map(|triangles| triangles.into_iter().map(IObject::Triangle).collect()),
+            _ => panic!("should not be reached"),
         }
     }
 }
@@ -61,6 +75,7 @@ impl std::fmt::Display for IObject {
             IObject::Cone(cone) => write!(f, "{}", cone),
             IObject::Menger(m) => write!(f, "{}", m),
             IObject::Triangle(triangle) => write!(f, "{}", triangle),
+            IObject::ObjFile(obj_file) => write!(f, "{}", obj_file),
         }
     }
 }
