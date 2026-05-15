@@ -11,6 +11,8 @@ pub struct Cuboid {
     pub dimensions: Vec3,
     pub orientation: Vec3,
     pub reflectiveness: f64,
+    pub transparency: f64,
+    pub refractive_index: f64,
 }
 
 impl Cuboid {

@@ -1,7 +1,7 @@
 use color::Color;
 use cone::Cone;
 use cuboid::Cuboid;
-use cylinder::Cylinder; support
+use cylinder::Cylinder;
 use menger::Menger;
 use obj_file::ObjFile;
 use plane::Plane;

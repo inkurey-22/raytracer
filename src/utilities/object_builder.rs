@@ -100,6 +100,7 @@ impl ObjectBuilder {
             }
             "dimensions" | "dimension" => {
                 self.dimensions = get_vec3(value)?;
+            }
             "path" => {
                 self.path = get_string(value)?;
             }
@@ -178,6 +179,8 @@ impl ObjectBuilder {
                 dimensions: self.dimensions,
                 orientation: self.orientation.into_vec3(1.0),
                 reflectiveness: self.reflectiveness,
+                transparency: self.transparency,
+                refractive_index: self.refractive_index,
             })),
             "obj_file" => Ok(object_interface::IObject::ObjFile(obj_file::ObjFile {
                 path: self.path.clone(),
