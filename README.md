@@ -93,9 +93,9 @@ COULDs are practically bonuses and each had a given number of points. Out of 40.
 - [ ] Automatic Reload on File Change
 
 #### Optimizations
-- [ ] Space Partitioning
-- [ ] Multithreading
-- [ ] Clustering (Network-based Rendering)
+- [x] Space Partitioning
+- [x] Multithreading
+- [x] Clustering (Network-based Rendering)
 
 ## Getting Started
 
