@@ -364,6 +364,7 @@ fn average_color(samples: &[Color]) -> Color {
     )
 }
 
+#[allow(clippy::too_many_arguments)]
 fn spawn_render_thread(
     next_tile: Arc<AtomicUsize>,
     tiles_x: usize,
@@ -440,7 +441,15 @@ pub fn render_rows_multithreaded(
     let total_tiles = tile_rows.saturating_mul(tile_cols).max(1);
     let max_threads = max_threads.min(total_tiles).max(1);
     let next_tile = Arc::new(AtomicUsize::new(0));
-    let resources = RenderResources::new(camera, width, height, lights, objects, sampling_config, total_tiles);
+    let resources = RenderResources::new(
+        camera,
+        width,
+        height,
+        lights,
+        objects,
+        sampling_config,
+        total_tiles,
+    );
     eprintln!(
         "Rendering rows {}..{} using {} worker threads (tile={}x{}, tiles={})",
         start_row, end_row, max_threads, TILE_SIZE, TILE_SIZE, total_tiles
