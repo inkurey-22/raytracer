@@ -24,11 +24,10 @@ reflectivity = 10
 
 [[objects.obj_file]]
 path = "configs/assets/raytracer_text.obj"
-position = { depth = 0.0, right = 0.0, up = 0.0 }
-orientation = { p = 0.0, y = 0.0, r = 0.0 }
-color = { r = 255, g = 255, b = 255 }
+position = { depth = 4.0, right = -2.0, up = 1.0 }
+orientation = { p = -10.0, y = 0.0, r = 0.0 }
 
-#[scenes]
+[scenes]
 #list = ["showcase_pedestrals.toml"]
 #list = ["showcase_objects.toml"]
 list = ["showcase_pedestrals.toml", "showcase_objects.toml"]

@@ -64,7 +64,7 @@ reflectiveness = 50
 position = { depth = -3.0, right = -1.5, up = 0.5 }
 orientation = { depth = 0.0, right = 0.0, up = 1.0 }
 size = 1.0
-level = 3
+level = 1
 color = { r = 200, g = 200, b = 200 }
 reflectiveness = 50
 
