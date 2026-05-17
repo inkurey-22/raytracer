@@ -141,10 +141,8 @@ fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
 }
 
 fn refract(direction: Vec3, normal: Vec3, eta_i: f64, eta_t: f64) -> Option<Vec3> {
-    let dir = direction.normalize();
-    let n = normal.normalize();
     let eta = eta_i / eta_t;
-    let cos_i = (-dir).dot(&n).clamp(-1.0, 1.0);
+    let cos_i = (-direction).dot(&normal).clamp(-1.0, 1.0);
     let sin_t2 = eta * eta * (1.0 - cos_i * cos_i);
 
     if sin_t2 > 1.0 {
@@ -152,7 +150,7 @@ fn refract(direction: Vec3, normal: Vec3, eta_i: f64, eta_t: f64) -> Option<Vec3
     }
 
     let cos_t = (1.0 - sin_t2).sqrt();
-    Some((dir * eta + n * (eta * cos_i - cos_t)).normalize())
+    Some(direction * eta + normal * (eta * cos_i - cos_t))
 }
 
 fn schlick(cosine: f64, eta_i: f64, eta_t: f64) -> f64 {
@@ -192,17 +190,19 @@ pub fn trace_ray(
             let mut shading_normal = hit.normal.normalize();
             let surface_normal = shading_normal;
             let mut eta_i = 1.0;
-            let mut eta_t = hit.object.get_refractive_index().max(EPSILON);
+            let refractive_index = hit.object.get_refractive_index().max(EPSILON);
+            let mut eta_t = refractive_index;
             let entering = ray.direction.dot(&shading_normal) < 0.0;
 
             if !entering {
                 shading_normal = -shading_normal;
-                eta_i = hit.object.get_refractive_index().max(EPSILON);
+                eta_i = refractive_index;
                 eta_t = 1.0;
             }
 
-            let reflected_direction = reflect(ray.direction, shading_normal).normalize();
-            let reflected_ray = Ray::new(hit.point + shading_normal * EPSILON, reflected_direction);
+            let reflected_direction = reflect(ray.direction, shading_normal);
+            let reflected_ray =
+                Ray::from_unit_direction(hit.point + shading_normal * EPSILON, reflected_direction);
             let reflected_color = trace_ray(&reflected_ray, lights, objects, depth + 1);
 
             let fresnel = if transparency > 0.0 {
@@ -223,7 +223,8 @@ pub fn trace_ray(
                         } else {
                             surface_normal * EPSILON
                         };
-                        let refracted_ray = Ray::new(hit.point + bias, direction);
+                        let refracted_ray =
+                            Ray::from_unit_direction(hit.point + bias, direction);
                         trace_ray(&refracted_ray, lights, objects, depth + 1)
                     })
                     .unwrap_or_else(|| reflected_color)
