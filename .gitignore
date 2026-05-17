@@ -2,3 +2,4 @@ target
 raytracer
 /*.ppm
 config
+output

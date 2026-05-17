@@ -1,6 +1,6 @@
 use std::f64;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{mpsc, Arc};
 use std::thread;
 
 use color::Color;
@@ -12,7 +12,7 @@ use ray::{EPSILON, Ray};
 const MAX_RECURSION: i32 = 22;
 const DEFAULT_SAMPLES_PER_PIXEL: usize = 16;
 const DEFAULT_VARIANCE_THRESHOLD: f64 = 0.01;
-const TILE_SIZE: usize = 8;
+const PROGRESS_STEP_PERCENT: usize = 10;
 
 #[derive(Clone)]
 pub struct SamplingConfig {
@@ -52,17 +52,10 @@ struct RenderResources {
     camera: Arc<Camera>,
     lights: Arc<Vec<light_interface::ILight>>,
     objects: Arc<Vec<object_interface::IObject>>,
-    tiles: Arc<Vec<Mutex<Option<TileBuffer>>>>,
     width: usize,
     height: usize,
     max_depth: usize,
     variance_threshold: f64,
-}
-
-struct TileBuffer {
-    start_row: usize,
-    start_col: usize,
-    data: Vec<Vec<Color>>,
 }
 
 impl RenderResources {
@@ -73,19 +66,11 @@ impl RenderResources {
         lights: &[light_interface::ILight],
         objects: &[object_interface::IObject],
         sampling_config: SamplingConfig,
-        total_tiles: usize,
     ) -> Self {
         Self {
             camera: Arc::new(*camera),
             lights: Arc::new(lights.to_vec()),
             objects: Arc::new(objects.to_vec()),
-            tiles: {
-                let mut tiles: Vec<Mutex<Option<TileBuffer>>> = Vec::with_capacity(total_tiles);
-                for _ in 0..total_tiles {
-                    tiles.push(Mutex::new(None));
-                }
-                Arc::new(tiles)
-            },
             width,
             height,
             max_depth: (sampling_config.samples_per_pixel as f64).log2().ceil() as usize,
@@ -364,49 +349,33 @@ fn average_color(samples: &[Color]) -> Color {
     )
 }
 
-#[allow(clippy::too_many_arguments)]
+fn render_pixel(x: usize, y: usize, sampling_context: &AdaptiveSamplingContext) -> Color {
+    let samples = adaptive_sample(sampling_context, x as f64, y as f64, 0);
+    average_color(&samples)
+}
+
 fn spawn_render_thread(
-    next_tile: Arc<AtomicUsize>,
-    tiles_x: usize,
-    total_tiles: usize,
+    next_pixel: Arc<AtomicUsize>,
+    total_pixels: usize,
     start_row: usize,
-    end_row: usize,
-    start_col: usize,
-    end_col: usize,
+    width: usize,
     resources: RenderResources,
+    tx: mpsc::Sender<(usize, Color)>,
 ) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let sampling_context = resources.sampling_context();
 
         loop {
-            let tile_index = next_tile.fetch_add(1, Ordering::Relaxed);
-            if tile_index >= total_tiles {
+            let pixel_index = next_pixel.fetch_add(1, Ordering::Relaxed);
+            if pixel_index >= total_pixels {
                 break;
             }
-            let tile_x = tile_index % tiles_x;
-            let tile_y = tile_index / tiles_x;
-
-            let tile_row_start = start_row + tile_y * TILE_SIZE;
-            let tile_col_start = start_col + tile_x * TILE_SIZE;
-            let tile_row_end = (tile_row_start + TILE_SIZE).min(end_row);
-            let tile_col_end = (tile_col_start + TILE_SIZE).min(end_col);
-            let tile_height = tile_row_end - tile_row_start;
-            let tile_width = tile_col_end - tile_col_start;
-            let mut tile = vec![vec![Color::default(); tile_width]; tile_height];
-
-            for (dy, y) in (tile_row_start..tile_row_end).enumerate() {
-                for (dx, x) in (tile_col_start..tile_col_end).enumerate() {
-                    let samples = adaptive_sample(&sampling_context, x as f64, y as f64, 0);
-                    tile[dy][dx] = average_color(&samples);
-                }
+            let y = start_row + pixel_index / width;
+            let x = pixel_index % width;
+            let color = render_pixel(x, y, &sampling_context);
+            if tx.send((pixel_index, color)).is_err() {
+                break;
             }
-
-            let mut slot = resources.tiles[tile_index].lock().unwrap();
-            *slot = Some(TileBuffer {
-                start_row: tile_row_start,
-                start_col: tile_col_start,
-                data: tile,
-            });
         }
     })
 }
@@ -429,66 +398,62 @@ pub fn render_rows_multithreaded(
         return Vec::new();
     }
 
+    let total_pixels = total_rows.saturating_mul(width);
+    if total_pixels == 0 {
+        return vec![Vec::new(); total_rows];
+    }
+
     let max_threads = std::thread::available_parallelism()
         .map(|n| n.get())
         .unwrap_or(4)
-        .min(total_rows)
+        .min(total_pixels)
         .max(1);
 
-    let total_cols = width;
-    let tile_rows = total_rows.div_ceil(TILE_SIZE);
-    let tile_cols = total_cols.div_ceil(TILE_SIZE);
-    let total_tiles = tile_rows.saturating_mul(tile_cols).max(1);
-    let max_threads = max_threads.min(total_tiles).max(1);
-    let next_tile = Arc::new(AtomicUsize::new(0));
-    let resources = RenderResources::new(
-        camera,
-        width,
-        height,
-        lights,
-        objects,
-        sampling_config,
-        total_tiles,
-    );
+    let resources = RenderResources::new(camera, width, height, lights, objects, sampling_config);
+    let next_pixel = Arc::new(AtomicUsize::new(0));
+    let (tx, rx) = mpsc::channel::<(usize, Color)>();
     eprintln!(
-        "Rendering rows {}..{} using {} worker threads (tile={}x{}, tiles={})",
-        start_row, end_row, max_threads, TILE_SIZE, TILE_SIZE, total_tiles
+        "Rendering rows {}..{} using {} worker threads (pixel-dispatch, {} pixels)",
+        start_row, end_row, max_threads, total_pixels
     );
     let mut handles = Vec::new();
 
     for _ in 0..max_threads {
         handles.push(spawn_render_thread(
-            next_tile.clone(),
-            tile_cols,
-            total_tiles,
+            next_pixel.clone(),
+            total_pixels,
             start_row,
-            end_row,
-            0,
-            total_cols,
+            width,
             resources.clone(),
+            tx.clone(),
         ));
+    }
+
+    drop(tx);
+
+    let mut flat = vec![Color::default(); total_pixels];
+    let mut completed_pixels = 0usize;
+    let mut next_progress = PROGRESS_STEP_PERCENT;
+    for _ in 0..total_pixels {
+        let (pixel_index, color) = rx.recv().unwrap();
+        flat[pixel_index] = color;
+        completed_pixels += 1;
+
+        let percent = completed_pixels * 100 / total_pixels;
+        if percent >= next_progress {
+            eprintln!(
+                "Render progress: {}% ({}/{})",
+                next_progress, completed_pixels, total_pixels
+            );
+            next_progress += PROGRESS_STEP_PERCENT;
+        }
     }
 
     for h in handles {
         h.join().unwrap();
     }
 
-    let mut result: Vec<Vec<Color>> = Vec::with_capacity(total_rows);
-    result.resize_with(total_rows, || vec![Color::default(); width]);
-
-    for tile_slot in resources.tiles.iter() {
-        let mut slot = tile_slot.lock().unwrap();
-        let tile = slot.take().expect("render tile missing");
-        for (dy, row) in tile.data.into_iter().enumerate() {
-            let target_y = tile.start_row - start_row + dy;
-            let target_row = &mut result[target_y];
-            for (dx, pixel) in row.into_iter().enumerate() {
-                target_row[tile.start_col + dx] = pixel;
-            }
-        }
-    }
-
-    result
+    flat.chunks(width).map(|row| row.to_vec()).collect()
 }
 
 pub fn write_ppm(filename: &str, image: &[Vec<Color>]) -> std::io::Result<()> {
