@@ -3,6 +3,7 @@ use directional_light::DirectionalLight;
 use omni_light::OmniLight;
 
 use color::Color;
+use object_interface::ObjectQuery;
 use vec3::Vec3;
 
 #[derive(Debug, Clone)]
@@ -20,29 +21,25 @@ impl ILight {
         view_dir: Vec3,
         surface_color: Color,
         reflectiveness: f64,
-        objects: &[object_interface::IObject],
+        objects: &dyn ObjectQuery,
     ) -> Color {
         match self {
-            ILight::OmniLight(omni_light) => {
-                omni_light.compute_contribution(
-                    hit_point,
-                    normal,
-                    view_dir,
-                    surface_color,
-                    reflectiveness,
-                    objects,
-                )
-            }
-            ILight::DirectionalLight(directional_light) => {
-                directional_light.compute_contribution(
-                    hit_point,
-                    normal,
-                    view_dir,
-                    surface_color,
-                    reflectiveness,
-                    objects,
-                )
-            }
+            ILight::OmniLight(omni_light) => omni_light.compute_contribution(
+                hit_point,
+                normal,
+                view_dir,
+                surface_color,
+                reflectiveness,
+                objects,
+            ),
+            ILight::DirectionalLight(directional_light) => directional_light.compute_contribution(
+                hit_point,
+                normal,
+                view_dir,
+                surface_color,
+                reflectiveness,
+                objects,
+            ),
             ILight::AmbiantLight(ambiant_light) => {
                 ambiant_light.color * ambiant_light.intensity * surface_color
             }

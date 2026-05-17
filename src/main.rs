@@ -320,6 +320,16 @@ fn run_client(server_addr: &str, args: Args) -> Result<(), Box<dyn std::error::E
     println!("Connected to server.");
     stream.set_nodelay(true).ok();
 
+    if args.config.is_empty() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::InvalidInput,
+            "No config provided to client; cannot render tasks",
+        )
+        .into());
+    }
+
+    let scene = config_parse::load_scene(&args.config)?;
+
     let mut reader = BufReader::new(stream.try_clone()?);
     loop {
         let mut line = String::new();
@@ -343,19 +353,6 @@ fn run_client(server_addr: &str, args: Args) -> Result<(), Box<dyn std::error::E
             let height: usize = parts[5].parse().unwrap_or(0);
 
             println!("Received TASK {} rows {}..{}", task_id, start_row, end_row);
-
-            if args.config.is_empty() {
-                eprintln!("No config provided to client; cannot render task");
-                continue;
-            }
-
-            let scene = match config_parse::load_scene(&args.config) {
-                Ok(s) => s,
-                Err(e) => {
-                    eprintln!("Failed to load scene: {}", e);
-                    continue;
-                }
-            };
 
             let sampling_config = SamplingConfig {
                 samples_per_pixel: args.samples_per_pixel.unwrap_or(16),

@@ -1,10 +1,9 @@
 use std::fmt;
 
 use color::Color;
+use object_interface::ObjectQuery;
 use ray::{EPSILON, Ray};
 use vec3::Vec3;
-
-use object_interface::IObject;
 
 #[derive(Debug, Clone, Copy)]
 pub struct OmniLight {
@@ -17,18 +16,8 @@ fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
     direction - normal * (2.0 * direction.dot(&normal))
 }
 
-fn is_obstructed(ray: &Ray, objects: &[object_interface::IObject], max_distance: f64) -> bool {
-    for object in objects {
-        if object.get_transparency() > 0.0 {
-            continue;
-        }
-        if let Some(hit) = object.intersect(ray, EPSILON) {
-            if hit.t < max_distance {
-                return true;
-            }
-        }
-    }
-    false
+fn is_obstructed(ray: &Ray, objects: &dyn ObjectQuery, max_distance: f64) -> bool {
+    objects.is_occluded(ray, max_distance)
 }
 
 impl OmniLight {
@@ -39,7 +28,7 @@ impl OmniLight {
         view_dir: Vec3,
         surface_color: Color,
         reflectiveness: f64,
-        objects: &[IObject],
+        objects: &dyn ObjectQuery,
     ) -> Color {
         let light_dir = (self.position - hit_point).normalize();
         let distance = (self.position - hit_point).length();

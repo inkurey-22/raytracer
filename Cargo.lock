@@ -121,6 +121,7 @@ dependencies = [
  "ray",
  "sphere",
  "triangle",
+ "vec3",
 ]
 
 [[package]]

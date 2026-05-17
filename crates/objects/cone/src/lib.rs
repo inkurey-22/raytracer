@@ -68,7 +68,8 @@ impl Cone {
                     }
                     let point = ray.at(t_candidate);
                     let height_along_axis = (point - self.apex).dot(&normal_normalized);
-                    if height_along_axis > epsilon && (!self.limited || height_along_axis < height) {
+                    if height_along_axis > epsilon && (!self.limited || height_along_axis < height)
+                    {
                         t_valid = Some(t_candidate);
                         break;
                     }

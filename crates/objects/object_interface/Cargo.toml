@@ -18,3 +18,4 @@ triangle = { path = "../triangle" }
 cuboid = { path = "../cuboid" }
 obj_file = { path = "../obj_file" }
 menger = { path = "../menger" }
+vec3 = { path = "../../vec3" }

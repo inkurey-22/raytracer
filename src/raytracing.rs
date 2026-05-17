@@ -1,9 +1,10 @@
 use std::f64;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{mpsc, Arc};
+use std::sync::{Arc, mpsc};
 use std::thread;
 
 use color::Color;
+use object_interface::{BvhScene, IObject, Material, ObjectQuery};
 use vec3::Vec3;
 
 use camera::Camera;
@@ -13,6 +14,7 @@ const MAX_RECURSION: i32 = 22;
 const DEFAULT_SAMPLES_PER_PIXEL: usize = 16;
 const DEFAULT_VARIANCE_THRESHOLD: f64 = 0.01;
 const PROGRESS_STEP_PERCENT: usize = 10;
+const MIN_SECONDARY_WEIGHT: f64 = 1e-3;
 
 #[derive(Clone)]
 pub struct SamplingConfig {
@@ -34,7 +36,7 @@ pub struct HitInfo {
     pub _depth: f64,
     pub point: Vec3,
     pub normal: Vec3,
-    pub object: object_interface::IObject,
+    pub material: Material,
 }
 
 struct AdaptiveSamplingContext<'a> {
@@ -42,7 +44,7 @@ struct AdaptiveSamplingContext<'a> {
     width: f64,
     height: f64,
     lights: &'a [light_interface::ILight],
-    objects: &'a [object_interface::IObject],
+    objects: &'a dyn ObjectQuery,
     max_depth: usize,
     variance_threshold: f64,
 }
@@ -51,7 +53,7 @@ struct AdaptiveSamplingContext<'a> {
 struct RenderResources {
     camera: Arc<Camera>,
     lights: Arc<Vec<light_interface::ILight>>,
-    objects: Arc<Vec<object_interface::IObject>>,
+    scene: Arc<BvhScene>,
     width: usize,
     height: usize,
     max_depth: usize,
@@ -64,13 +66,13 @@ impl RenderResources {
         width: usize,
         height: usize,
         lights: &[light_interface::ILight],
-        objects: &[object_interface::IObject],
+        objects: &[IObject],
         sampling_config: SamplingConfig,
     ) -> Self {
         Self {
             camera: Arc::new(*camera),
             lights: Arc::new(lights.to_vec()),
-            objects: Arc::new(objects.to_vec()),
+            scene: Arc::new(BvhScene::new(objects.to_vec())),
             width,
             height,
             max_depth: (sampling_config.samples_per_pixel as f64).log2().ceil() as usize,
@@ -84,41 +86,32 @@ impl RenderResources {
             width: self.width as f64,
             height: self.height as f64,
             lights: self.lights.as_slice(),
-            objects: self.objects.as_slice(),
+            objects: self.scene.as_ref(),
             max_depth: self.max_depth,
             variance_threshold: self.variance_threshold,
         }
     }
 }
 
-pub fn find_closest_hit(ray: &Ray, objects: &[object_interface::IObject]) -> Option<HitInfo> {
-    let mut closest_t = f64::INFINITY;
-    let mut hit_info: Option<HitInfo> = None;
-
-    for object in objects {
-        if let Some(hit) = object.intersect(ray, EPSILON)
-            && hit.t < closest_t
-        {
-            closest_t = hit.t;
-            hit_info = Some(HitInfo {
-                _depth: hit.t,
-                point: hit.point,
-                normal: hit.normal,
-                object: object.clone(),
-            });
-        }
-    }
-
-    hit_info
+pub fn find_closest_hit(ray: &Ray, objects: &dyn ObjectQuery) -> Option<HitInfo> {
+    objects
+        .closest_hit(ray, EPSILON)
+        .map(|(hit, material)| HitInfo {
+            _depth: hit.t,
+            point: hit.point,
+            normal: hit.normal,
+            material,
+        })
 }
 
 pub fn compute_lighting(
     hit_point: Vec3,
     normal: Vec3,
     view_dir: Vec3,
-    hit_object: &object_interface::IObject,
+    surface_color: Color,
+    reflectiveness: f64,
     lights: &[light_interface::ILight],
-    objects: &[object_interface::IObject],
+    objects: &dyn ObjectQuery,
 ) -> Color {
     let mut lighting = Color::new(0.0, 0.0, 0.0);
 
@@ -127,8 +120,8 @@ pub fn compute_lighting(
             hit_point,
             normal,
             view_dir,
-            hit_object.get_color(),
-            hit_object.get_reflectiveness(),
+            surface_color,
+            reflectiveness,
             objects,
         );
     }
@@ -162,7 +155,7 @@ fn schlick(cosine: f64, eta_i: f64, eta_t: f64) -> f64 {
 pub fn trace_ray(
     ray: &Ray,
     lights: &[light_interface::ILight],
-    objects: &[object_interface::IObject],
+    objects: &dyn ObjectQuery,
     depth: i32,
 ) -> Color {
     if depth > MAX_RECURSION {
@@ -171,26 +164,13 @@ pub fn trace_ray(
 
     match find_closest_hit(ray, objects) {
         Some(hit) => {
-            let view_dir = -ray.direction;
-            let local_color = compute_lighting(
-                hit.point,
-                hit.normal,
-                view_dir,
-                &hit.object,
-                lights,
-                objects,
-            );
-            let reflectiveness = hit.object.get_reflectiveness().clamp(0.0, 1.0);
-            let transparency = hit.object.get_transparency().clamp(0.0, 1.0);
-
-            if reflectiveness <= 0.0 && transparency <= 0.0 {
-                return local_color.normalize_max();
-            }
+            let reflectiveness = hit.material.reflectiveness.clamp(0.0, 1.0);
+            let transparency = hit.material.transparency.clamp(0.0, 1.0);
 
             let mut shading_normal = hit.normal.normalize();
             let surface_normal = shading_normal;
             let mut eta_i = 1.0;
-            let refractive_index = hit.object.get_refractive_index().max(EPSILON);
+            let refractive_index = hit.material.refractive_index.max(EPSILON);
             let mut eta_t = refractive_index;
             let entering = ray.direction.dot(&shading_normal) < 0.0;
 
@@ -200,34 +180,65 @@ pub fn trace_ray(
                 eta_t = 1.0;
             }
 
-            let reflected_direction = reflect(ray.direction, shading_normal);
-            let reflected_ray =
-                Ray::from_unit_direction(hit.point + shading_normal * EPSILON, reflected_direction);
-            let reflected_color = trace_ray(&reflected_ray, lights, objects, depth + 1);
-
             let fresnel = if transparency > 0.0 {
                 schlick((-ray.direction).dot(&shading_normal).abs(), eta_i, eta_t)
             } else {
                 0.0
             };
 
-            let reflection_weight = (reflectiveness + fresnel * transparency).max(0.0);
-            let transmission_weight = ((1.0 - fresnel) * transparency).max(0.0);
+            let mut reflection_weight = (reflectiveness + fresnel * transparency).max(0.0);
+            let mut transmission_weight = ((1.0 - fresnel) * transparency).max(0.0);
+            let mut refracted_direction = if transmission_weight > 0.0 {
+                refract(ray.direction, shading_normal, eta_i, eta_t)
+            } else {
+                None
+            };
+
+            if transparency > 0.0 && refracted_direction.is_none() {
+                reflection_weight = (reflection_weight + transparency).max(0.0);
+                transmission_weight = 0.0;
+            }
+
             let local_weight = (1.0 - reflectiveness - transparency).max(0.0);
 
-            let refracted_color = if transmission_weight > 0.0 {
-                refract(ray.direction, shading_normal, eta_i, eta_t)
-                    .map(|direction| {
-                        let bias = if entering {
-                            -surface_normal * EPSILON
-                        } else {
-                            surface_normal * EPSILON
-                        };
-                        let refracted_ray =
-                            Ray::from_unit_direction(hit.point + bias, direction);
-                        trace_ray(&refracted_ray, lights, objects, depth + 1)
-                    })
-                    .unwrap_or_else(|| reflected_color)
+            let view_dir = -ray.direction;
+            let local_color = if local_weight > MIN_SECONDARY_WEIGHT {
+                compute_lighting(
+                    hit.point,
+                    hit.normal,
+                    view_dir,
+                    hit.material.color,
+                    hit.material.reflectiveness,
+                    lights,
+                    objects,
+                )
+            } else {
+                Color::new(0.0, 0.0, 0.0)
+            };
+
+            let reflected_color = if reflection_weight > MIN_SECONDARY_WEIGHT {
+                let reflected_direction = reflect(ray.direction, shading_normal);
+                let reflected_ray = Ray::from_unit_direction(
+                    hit.point + shading_normal * EPSILON,
+                    reflected_direction,
+                );
+                trace_ray(&reflected_ray, lights, objects, depth + 1)
+            } else {
+                Color::new(0.0, 0.0, 0.0)
+            };
+
+            let refracted_color = if let Some(direction) = refracted_direction.take() {
+                if transmission_weight > MIN_SECONDARY_WEIGHT {
+                    let bias = if entering {
+                        -surface_normal * EPSILON
+                    } else {
+                        surface_normal * EPSILON
+                    };
+                    let refracted_ray = Ray::from_unit_direction(hit.point + bias, direction);
+                    trace_ray(&refracted_ray, lights, objects, depth + 1)
+                } else {
+                    Color::new(0.0, 0.0, 0.0)
+                }
             } else {
                 Color::new(0.0, 0.0, 0.0)
             };

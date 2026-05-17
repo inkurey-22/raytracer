@@ -1,6 +1,7 @@
 use std::fmt;
 
 use color::Color;
+use object_interface::ObjectQuery;
 use ray::{Ray, EPSILON};
 use vec3::Vec3;
 
@@ -25,16 +26,8 @@ impl Default for DirectionalLight {
     }
 }
 
-fn is_obstructed(ray: &Ray, objects: &[object_interface::IObject]) -> bool {
-    for object in objects {
-        if object.get_transparency() > 0.0 {
-            continue;
-        }
-        if object.intersect(ray, EPSILON).is_some() {
-            return true;
-        }
-    }
-    false
+fn is_obstructed(ray: &Ray, objects: &dyn ObjectQuery) -> bool {
+    objects.is_occluded(ray, f64::INFINITY)
 }
 
 fn reflect(direction: Vec3, normal: Vec3) -> Vec3 {
@@ -49,7 +42,7 @@ impl DirectionalLight {
         view_dir: Vec3,
         surface_color: Color,
         reflectiveness: f64,
-        objects: &[object_interface::IObject],
+        objects: &dyn ObjectQuery,
     ) -> Color {
         let light_dir = -self.direction.normalize();
         let shadow_ray = Ray::new(hit_point + normal * EPSILON, light_dir);
