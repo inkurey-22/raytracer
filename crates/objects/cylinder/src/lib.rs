@@ -43,25 +43,30 @@ impl Cylinder {
         let half_b = oc.dot(&d) - (oc.dot(&axis) * d.dot(&axis));
         let c = oc.dot(&oc) - (oc.dot(&axis) * oc.dot(&axis)) - self.radius * self.radius;
 
-        let discriminant = half_b * half_b - a * c;
-        if discriminant >= 0.0 {
-            let sqrt_d = discriminant.sqrt();
-            let t1 = (-half_b - sqrt_d) / a;
-            let t2 = (-half_b + sqrt_d) / a;
-            let t = if t1 > epsilon {
-                t1
-            } else if t2 > epsilon {
-                t2
-            } else {
-                f64::INFINITY
-            };
+        if a.abs() > epsilon {
+            let mut discriminant = half_b * half_b - a * c;
+            if discriminant >= -epsilon {
+                if discriminant < 0.0 {
+                    discriminant = 0.0;
+                }
+                let sqrt_d = discriminant.sqrt();
+                let t1 = (-half_b - sqrt_d) / a;
+                let t2 = (-half_b + sqrt_d) / a;
+                let t = if t1 > epsilon {
+                    t1
+                } else if t2 > epsilon {
+                    t2
+                } else {
+                    f64::INFINITY
+                };
 
-            if t != f64::INFINITY {
-                let point = ray.at(t);
-                let oc_hit = point - self.center;
-                let height = oc_hit.dot(&axis);
-                if !self.limited || (height >= 0.0 && height <= 1.0) {
-                    closest_hit = Some((t, point));
+                if t.is_finite() && t != f64::INFINITY {
+                    let point = ray.at(t);
+                    let oc_hit = point - self.center;
+                    let height = oc_hit.dot(&axis);
+                    if !self.limited || (height >= -epsilon && height <= 1.0 + epsilon) {
+                        closest_hit = Some((t, point));
+                    }
                 }
             }
         }
@@ -75,7 +80,7 @@ impl Cylinder {
                     let radial_dist =
                         (point - self.center - axis * (point - self.center).dot(&axis)).length();
                     if radial_dist <= self.radius {
-                        if closest_hit.is_none() || t < closest_hit.unwrap().0 {
+                        if closest_hit.is_none_or(|(closest_t, _)| t < closest_t) {
                             closest_hit = Some((t, point));
                         }
                     }
@@ -89,7 +94,7 @@ impl Cylinder {
                     let radial_dist =
                         (point - self.center - axis * (point - self.center).dot(&axis)).length();
                     if radial_dist <= self.radius {
-                        if closest_hit.is_none() || t < closest_hit.unwrap().0 {
+                        if closest_hit.is_none_or(|(closest_t, _)| t < closest_t) {
                             closest_hit = Some((t, point));
                         }
                     }
@@ -100,14 +105,35 @@ impl Cylinder {
         closest_hit.map(|(t, point)| {
             let oc_hit = point - self.center;
             let height = oc_hit.dot(&axis);
-            let normal = if height <= 0.0 {
+            let normal = if height <= epsilon {
                 -axis
-            } else if height >= 1.0 {
+            } else if height >= 1.0 - epsilon {
                 axis
             } else {
                 (oc_hit - axis * height).normalize()
             };
             HitRecord { point, normal, t }
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn intersect_parallel_ray_does_not_produce_invalid_hit() {
+        let cylinder = Cylinder {
+            center: Vec3::new(0.0, 0.0, 0.0),
+            radius: 1.0,
+            color: Color::new(1.0, 1.0, 1.0),
+            normal: Vec3::new(0.0, 1.0, 0.0),
+            limited: false,
+            reflectiveness: 0.0,
+            transparency: 0.0,
+            refractive_index: 1.0,
+        };
+        let ray = Ray::new(Vec3::new(2.0, 0.0, 0.0), Vec3::new(0.0, 1.0, 0.0));
+        assert!(cylinder.intersect(&ray, 1e-6).is_none());
     }
 }

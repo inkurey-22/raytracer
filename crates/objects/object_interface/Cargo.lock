@@ -16,7 +16,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "cuboid"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "ray",
+ "vec3",
+]
+
+[[package]]
 name = "cylinder"
+version = "0.1.0"
+dependencies = [
+ "color",
+ "ray",
+ "vec3",
+]
+
+[[package]]
+name = "menger"
 version = "0.1.0"
 dependencies = [
  "color",
@@ -39,7 +57,9 @@ version = "0.1.0"
 dependencies = [
  "color",
  "cone",
+ "cuboid",
  "cylinder",
+ "menger",
  "obj_file",
  "plane",
  "ray",
