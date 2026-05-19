@@ -2,7 +2,7 @@
 
 make
 
-export CONFIG_LIST="configs/empty.toml configs/importer.toml configs/showcase.toml config/example.toml"
+export CONFIG_LIST="configs/empty.toml configs/importer.toml configs/ferris_the_crab.toml configs/object.toml configs/example.toml configs/showcase.toml"
 
 echo "" > output/log.txt
 
